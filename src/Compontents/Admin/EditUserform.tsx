@@ -52,21 +52,27 @@ const validationSchema = Yup.object({
   price_tag_id: Yup.number().required().typeError("Select price tag"),
   pay_type: Yup.number().required().typeError("Select pay type"),
   line_id: Yup.number().required("Line is required"),
-  slot_data: Yup.array().when(["customer_type", "user_type"], (customer_type, user_type) => {
-    if (customer_type === 1 && user_type !== 2) {
-      return Yup.array()
-        .of(
-          Yup.object({
-            slot_id: Yup.number().required("Select slot").min(1),
-            quantity: Yup.number().required("Quantity is required").min(1),
-            method: Yup.number().required("Select method").min(1),
-            start_date: Yup.string().required("Start date is required"),
-          })
-        )
-        .min(1, "At least one slot is required");
-    }
-    return Yup.array().notRequired();
-  }),
+ slot_data: Yup.array().when(["user_type", "customer_type"], {
+      is: (user_type: number, customer_type: number) =>
+        user_type === 5 && customer_type === 1,
+      then: () =>
+        Yup.array()
+          .of(
+            Yup.object().shape({
+              slot_id: Yup.number(),
+              quantity: Yup.number().nullable(),
+              method: Yup.number().nullable(),
+              start_date: Yup.string().nullable(),
+            })
+          )
+          .test(
+            "at-least-one-slot",
+            "At least one slot (morning or evening) must be filled",
+            (slots = []) =>
+              slots.some((slot) => !!slot.quantity && !!slot.method)
+          ),
+      otherwise: () => Yup.mixed().notRequired(),
+    }),
 });
 
 const EditUserform: React.FC<Props> = ({ user, onBack }) => {
