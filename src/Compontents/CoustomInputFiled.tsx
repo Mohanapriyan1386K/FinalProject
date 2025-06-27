@@ -36,7 +36,6 @@ const CustomInputField: React.FC<CustomInputProps> = ({
   required = false,
   autoFocus = false,
   variant = "outlined",
-  helperText = "",
   sx,
 }) => {
   return (
