@@ -2,12 +2,11 @@ import { useEffect, useState, type SetStateAction } from "react";
 import { Table, Spin, Select } from "antd";
 import { ViwslotMap } from "../../../Services/ApiService";
 import { getDecryptedCookie } from "../../../Uitils/Cookeis";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, styled, Typography } from "@mui/material";
 import CustomButton from "../../../Compontents/CoustomButton";
 import { useNavigate } from "react-router-dom";
 import CustomInputField from "../../../Compontents/CoustomInputFiled";
 
-// ✅ Correct Select.Option usage
 const { Option } = Select;
 
 export interface SlotLog {
@@ -32,59 +31,114 @@ export interface SlotLog {
 }
 
 const columns = [
-  { title: "Slot Log ID", dataIndex: "slot_log_id", key: "slot_log_id" },
-  { title: "Customer Name", dataIndex: "customer_name", key: "customer_name" },
+  {  title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Scheduled Date
+      </span>
+    ), dataIndex: "customer_name", key: "customer_name" },
   {
-    title: "Assigned Name",
+      title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Assigned
+      </span>
+    ),
+
     dataIndex: "assigned_name",
     key: "assigned_name",
     render: (text: string | null) => text ?? "Unassigned",
   },
-  { title: "Slot Name", dataIndex: "slot_name", key: "slot_name" },
+  {  title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Slot
+      </span>
+    ),
+ },
   {
-    title: "Milk Given Type",
+      title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Method
+      </span>
+    ),
     dataIndex: "milk_given_type",
     key: "milk_given_type",
   },
   {
-    title: "Scheduled Date",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Scheduled Date
+      </span>
+    ),
+
     dataIndex: "scheduled_date",
     key: "scheduled_date",
   },
   {
-    title: "Milk Given Status",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Milk Given Status
+      </span>
+    ),
+
     dataIndex: "milk_given_status",
     key: "milk_given_status",
   },
   {
-    title: "Given Qty (L)",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Given Qty
+      </span>
+    ),
     dataIndex: "milk_given_quantity",
     key: "milk_given_quantity",
   },
   {
-    title: "Actual Qty (L)",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Actual Qty (L)
+      </span>
+    ),
     dataIndex: "actual_milk_quantity",
     key: "actual_milk_quantity",
   },
   {
-    title: "Pay Mode",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Pay Mode (L)
+      </span>
+    ),
     dataIndex: "user_pay_mode",
     key: "user_pay_mode",
     render: (mode: number) =>
       mode === 1 ? "Cash" : mode === 2 ? "Online" : "Other",
   },
   {
-    title: "Unit Price",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Unit Price
+      </span>
+    ),
     dataIndex: "unit_price",
     key: "unit_price",
     render: (price: string) => `₹${price}`,
   },
-  { title: "Assigned", dataIndex: "is_assigned", key: "is_assigned" },
   {
-    title: "Status",
+    title: (
+      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
+        Status
+      </span>
+    ),
     dataIndex: "status",
     key: "status",
-    render: (value: number) => (value === 1 ? "Active" : "Inactive"),
+    render: (value: number) => (
+      <span
+        style={{
+          color: value === 1 ? "green" : "red",
+          fontWeight: 600,
+        }}
+      >
+        {value === 1 ? "Active" : "Inactive"}
+      </span>
+    ),
   },
 ];
 
@@ -100,6 +154,7 @@ function Slotmapping() {
   const [filterData, setFilterData] = useState<SlotLog[]>([]);
   const [date, setDate] = useState("2025-06-25");
   const [coustomerId, setcoustomerId] = useState<any>();
+  const [slotid, setSlotId] = useState<any>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,6 +163,7 @@ function Slotmapping() {
       try {
         const res = await ViwslotMap(payload, 1, 10);
         setData(res.data.data || []);
+        console.log(res.data.data);
       } catch (error) {
         console.error("Error fetching slot map data", error);
       } finally {
@@ -119,6 +175,7 @@ function Slotmapping() {
 
   const handleFilter = () => {
     const payload = new FormData();
+    console.log(userdata.token);
     payload.append("token", userdata?.token || "");
 
     if (mode) {
@@ -132,8 +189,12 @@ function Slotmapping() {
     if (data) {
       payload.append("from_date", date);
     }
-    if(coustomerId){
-      payload.append("customer_id",coustomerId)
+    if (coustomerId) {
+      payload.append("customer_id", coustomerId);
+    }
+
+    if (slotid) {
+      payload.append("slot_id", slotid);
     }
 
     ViwslotMap(payload, 1, 10).then((res) => {
@@ -196,10 +257,12 @@ function Slotmapping() {
         >
           <Select
             placeholder="Select Type"
-            style={{ width: 200, height: 40 }}
+            style={{ width: 200, height: 40, marginRight: 16 }}
             value={mode}
             onChange={(value) => setMode(value)}
+            showSearch
             allowClear
+            optionFilterProp="children"
           >
             <Option value={1}>Direct</Option>
             <Option value={2}>Distributor</Option>
@@ -210,12 +273,33 @@ function Slotmapping() {
             style={{ width: 200, height: 40 }}
             value={status}
             onChange={(value) => setStatus(value)}
+            showSearch
             allowClear
+            optionFilterProp="children"
           >
             <Option value="1">Given</Option>
             <Option value="2">Upcoming</Option>
             <Option value="3">Partially Given</Option>
             <Option value="4">Cancelled</Option>
+          </Select>
+
+          <Select
+            placeholder="Select or type slot"
+            style={{ width: 200, height: 40 }}
+            value={slotid}
+            onChange={(value) => setSlotId(value)}
+            onSearch={(value) => setSlotId(value)}
+            showSearch
+            allowClear
+            filterOption={(input, option) =>
+              (option?.children as unknown as string)
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+            notFoundContent={null}
+          >
+            <Option value="1">Morning</Option>
+            <Option value="2">Evening</Option>
           </Select>
 
           <CustomInputField
@@ -257,7 +341,7 @@ function Slotmapping() {
       {loading ? (
         <Spin />
       ) : (
-        <Paper>
+        <div style={{ fontSize: "10px" }}>
           <Table
             columns={columns}
             dataSource={filter ? filterData : data}
@@ -270,7 +354,7 @@ function Slotmapping() {
             }}
             bordered
           />
-        </Paper>
+        </div>
       )}
     </div>
   );
