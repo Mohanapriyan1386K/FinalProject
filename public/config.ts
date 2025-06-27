@@ -1,0 +1,1 @@
+export const SECRET_KEY="Mohan@1386"

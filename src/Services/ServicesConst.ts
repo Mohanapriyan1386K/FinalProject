@@ -1,0 +1,1 @@
+export  const BaseUrl="http://vasamilkapi.pydemo.themaestro.in"
