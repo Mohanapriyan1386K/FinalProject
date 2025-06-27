@@ -1,5 +1,6 @@
+// UserForm.tsx
 import React, { useEffect, useState } from "react";
-import { useFormik } from "formik";
+import { useFormik, type FormikErrors } from "formik";
 import * as Yup from "yup";
 import { message, notification, Spin } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +15,29 @@ import {
   getUserById,
   getLinesDropDown,
 } from "../../Services/ApiService";
+
+interface Slot {
+  slot_id: number;
+  quantity: number;
+  method: number;
+  start_date: string;
+}
+
+interface FormValues {
+  name: string;
+  user_name: string;
+  email: string;
+  phone: string;
+  alternative_number: string;
+  password: string;
+  user_type: string | number;
+  customer_type: number;
+  price_tag_id: number;
+  line_id: number;
+  pay_type: number;
+  slot_data: Slot[];
+  isEdit: boolean;
+}
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -68,7 +92,7 @@ const UserForm: React.FC = () => {
 
   const token = getDecryptedCookie("user_token")?.token;
 
-  const formik = useFormik({
+  const formik = useFormik<FormValues>({
     initialValues: {
       name: "",
       user_name: "",
@@ -92,8 +116,8 @@ const UserForm: React.FC = () => {
         name: values.name,
         user_name: values.user_name,
         email: values.email,
-        phone:values.phone,
-        alternative_number:values.alternative_number ,
+        phone: values.phone,
+        alternative_number: values.alternative_number,
         user_type: Number(values.user_type),
         customer_type: Number(values.customer_type),
         line_id: Number(values.line_id),
@@ -106,7 +130,6 @@ const UserForm: React.FC = () => {
       }
 
       const isRegularCustomer = Number(values.customer_type) === 1;
-
       if (isRegularCustomer && Array.isArray(values.slot_data)) {
         const cleanedSlotData = values.slot_data.filter(
           (slot) => slot.slot_id && slot.quantity && slot.method && slot.start_date
@@ -230,15 +253,21 @@ const UserForm: React.FC = () => {
   const isAdmin = values.user_type?.toString() === "2";
   const isRegularCustomer = values.customer_type?.toString() === "1";
 
+  const getSlotError = (key: keyof Slot) => {
+    const slotErr = errors.slot_data?.[0];
+    return typeof slotErr === "object" ? (slotErr as FormikErrors<Slot>)[key] : undefined;
+  };
+
+  const getSlotTouched = (key: keyof Slot) => {
+    const slotTouch = touched.slot_data?.[0];
+    return typeof slotTouch === "object" ? slotTouch[key] : undefined;
+  };
+
   return (
     <Box sx={{ maxWidth: 700, margin: "auto", padding: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h4">{isEdit ? "Edit User" : "Add User"}</Typography>
-        <Button
-          variant="outlined"
-          onClick={() => navigate("/admin-dashboard/users")}
-          sx={{ px: 3 }}
-        >
+        <Button variant="outlined" onClick={() => navigate("/admin-dashboard/users")} sx={{ px: 3 }}>
           Back
         </Button>
       </Box>
@@ -265,10 +294,10 @@ const UserForm: React.FC = () => {
 
               {isRegularCustomer && (
                 <>
-                  <CustomSelect label="Slot" name="slot_data[0].slot_id" value={values.slot_data?.[0]?.slot_id} options={slotOptions} onChange={(val) => setFieldValue("slot_data[0].slot_id", val)} onBlur={handleBlur} error={errors.slot_data?.[0]?.slot_id} touched={touched.slot_data?.[0]?.slot_id} />
-                  <CustomInput label="Quantity" name="slot_data[0].quantity" type="number" value={values.slot_data?.[0]?.quantity} onChange={handleChange} onBlur={handleBlur} error={errors.slot_data?.[0]?.quantity} touched={touched.slot_data?.[0]?.quantity} />
-                  <CustomSelect label="Method" name="slot_data[0].method" value={values.slot_data?.[0]?.method} options={[{ label: "Direct", value: 1 }, { label: "Distributor", value: 2 }]} onChange={(val) => setFieldValue("slot_data[0].method", val)} onBlur={handleBlur} error={errors.slot_data?.[0]?.method} touched={touched.slot_data?.[0]?.method} />
-                  <CustomInput label="Start Date" name="slot_data[0].start_date" type="date" value={values.slot_data?.[0]?.start_date} onChange={handleChange} onBlur={handleBlur} error={errors.slot_data?.[0]?.start_date} touched={touched.slot_data?.[0]?.start_date} />
+                  <CustomSelect label="Slot" name="slot_data[0].slot_id" value={values.slot_data?.[0]?.slot_id} options={slotOptions} onChange={(val) => setFieldValue("slot_data[0].slot_id", val)} onBlur={handleBlur} error={getSlotError("slot_id")} touched={getSlotTouched("slot_id")} />
+                  <CustomInput label="Quantity" name="slot_data[0].quantity" type="number" value={values.slot_data?.[0]?.quantity} onChange={handleChange} onBlur={handleBlur} error={getSlotError("quantity")} touched={getSlotTouched("quantity")} />
+                  <CustomSelect label="Method" name="slot_data[0].method" value={values.slot_data?.[0]?.method} options={[{ label: "Direct", value: 1 }, { label: "Distributor", value: 2 }]} onChange={(val) => setFieldValue("slot_data[0].method", val)} onBlur={handleBlur} error={getSlotError("method")} touched={getSlotTouched("method")} />
+                  <CustomInput label="Start Date" name="slot_data[0].start_date" type="date" value={values.slot_data?.[0]?.start_date} onChange={handleChange} onBlur={handleBlur} error={getSlotError("start_date")} touched={getSlotTouched("start_date")} />
                 </>
               )}
 

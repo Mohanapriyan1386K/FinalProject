@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useFormik } from "formik";
+import { useFormik, type FormikErrors } from "formik";
 import * as Yup from "yup";
 import { Box, Typography } from "@mui/material";
 import { message, Spin } from "antd";
@@ -9,6 +9,13 @@ import CustomButton from "../CoustomButton";
 import { getLinesDropDown, updateUser } from "../../Services/ApiService";
 import { getDecryptedCookie } from "../../Uitils/Cookeis";
 import { PriceTagData } from "../../Services/Data";
+
+interface Slot {
+  slot_id: number;
+  quantity: number;
+  method: number;
+  start_date: string;
+}
 
 interface User {
   id: number;
@@ -22,12 +29,7 @@ interface User {
   line_id: number;
   price_tag_id: number;
   pay_type: number;
-  slot_data: {
-    slot_id: number;
-    quantity: number;
-    method: number;
-    start_date: string;
-  }[];
+  slot_data: Slot[];
 }
 
 interface Props {
@@ -74,7 +76,7 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = getDecryptedCookie("user_token").token;
 
-  const formik = useFormik({
+  const formik = useFormik<User>({
     initialValues: {
       name: user.name,
       user_name: user.user_name,
@@ -86,20 +88,25 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
       price_tag_id: user.price_tag_id,
       line_id: user.line_id,
       pay_type: user.pay_type,
-      slot_data: user.slot_data?.length ? user.slot_data : [{
-        slot_id: 0,
-        quantity: 0,
-        method: 0,
-        start_date: ""
-      }],
+      slot_data: user.slot_data?.length
+        ? user.slot_data
+        : [
+            {
+              slot_id: 0,
+              quantity: 0,
+              method: 0,
+              start_date: "",
+            },
+          ],
+      id: user.id,
     },
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
       const payload = {
+        ...values,
         token,
         user_id: user.id,
-        ...values,
       };
 
       try {
@@ -120,7 +127,15 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
     },
   });
 
-  const { values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue } = formik;
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setFieldValue,
+  } = formik;
 
   const isAdmin = values.user_type === 2;
   const isRegularCustomer = values.customer_type === 1;
@@ -154,7 +169,10 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
         const res = await getLinesDropDown(formData);
         if (res.data.status === 1) {
           setLineOptions(
-            res.data.data.map((line: any) => ({ label: line.line_name, value: line.id }))
+            res.data.data.map((line: any) => ({
+              label: line.line_name,
+              value: line.id,
+            }))
           );
         } else {
           message.error(res.data.msg || "Line fetch failed");
@@ -170,6 +188,19 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
     { label: "Evening (14:30 - 19:14)", value: 2 },
   ];
 
+  // Helper functions for nested field validation
+  const getSlotError = (key: keyof Slot) => {
+    const slotError = errors.slot_data?.[0];
+    return typeof slotError === "object"
+      ? (slotError as FormikErrors<Slot>)[key]
+      : undefined;
+  };
+
+  const getSlotTouched = (key: keyof Slot) => {
+    const slotTouched = touched.slot_data?.[0];
+    return typeof slotTouched === "object" ? slotTouched[key] : undefined;
+  };
+
   return (
     <Box sx={{ maxWidth: 700, mx: "auto", p: 3 }}>
       <Typography variant="h4" mb={2}>
@@ -180,28 +211,165 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
         <Spin />
       ) : (
         <form onSubmit={handleSubmit}>
-          <CustomInput label="Name" name="name" value={values.name} onChange={handleChange} onBlur={handleBlur} error={errors.name} touched={touched.name} />
-          <CustomInput label="Username" name="user_name" value={values.user_name} onChange={handleChange} onBlur={handleBlur} error={errors.user_name} touched={touched.user_name} />
-          <CustomInput label="Email" name="email" value={values.email} onChange={handleChange} onBlur={handleBlur} error={errors.email} touched={touched.email} />
-          <CustomInput label="Phone" name="phone" value={values.phone} onChange={handleChange} onBlur={handleBlur} error={errors.phone} touched={touched.phone} />
-          <CustomInput label="Alternative Number" name="alternative_number" value={values.alternative_number} onChange={handleChange} onBlur={handleBlur} error={errors.alternative_number} touched={touched.alternative_number} />
+          <CustomInput
+            label="Name"
+            name="name"
+            value={values.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.name}
+            touched={touched.name}
+          />
+          <CustomInput
+            label="Username"
+            name="user_name"
+            value={values.user_name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.user_name}
+            touched={touched.user_name}
+          />
+          <CustomInput
+            label="Email"
+            name="email"
+            value={values.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.email}
+            touched={touched.email}
+          />
+          <CustomInput
+            label="Phone"
+            name="phone"
+            value={values.phone}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.phone}
+            touched={touched.phone}
+          />
+          <CustomInput
+            label="Alternative Number"
+            name="alternative_number"
+            value={values.alternative_number}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.alternative_number}
+            touched={touched.alternative_number}
+          />
 
-          <CustomSelect label="User Type" name="user_type" value={values.user_type} options={[{ label: "Admin", value: 2 }, { label: "Vendor/logger", value: 1 }, { label: "Distributor", value: 4 }, { label: "Customer", value: 5 }]} onChange={(val) => setFieldValue("user_type", val)} onBlur={handleBlur} error={errors.user_type} touched={touched.user_type} />
+          <CustomSelect
+            label="User Type"
+            name="user_type"
+            value={values.user_type}
+            options={[
+              { label: "Admin", value: 2 },
+              { label: "Vendor/logger", value: 1 },
+              { label: "Distributor", value: 4 },
+              { label: "Customer", value: 5 },
+            ]}
+            onChange={(val) => setFieldValue("user_type", val)}
+            onBlur={handleBlur}
+            error={errors.user_type}
+            touched={touched.user_type}
+          />
 
           {!isAdmin && (
             <>
-              <CustomSelect label="Customer Type" name="customer_type" value={values.customer_type} options={[{ label: "Regular", value: 1 }, { label: "Occasional", value: 2 }]} onChange={(val) => setFieldValue("customer_type", val)} onBlur={handleBlur} error={errors.customer_type} touched={touched.customer_type} />
+              <CustomSelect
+                label="Customer Type"
+                name="customer_type"
+                value={values.customer_type}
+                options={[
+                  { label: "Regular", value: 1 },
+                  { label: "Occasional", value: 2 },
+                ]}
+                onChange={(val) => setFieldValue("customer_type", val)}
+                onBlur={handleBlur}
+                error={errors.customer_type}
+                touched={touched.customer_type}
+              />
+
               {isRegularCustomer && (
                 <>
-                  <CustomSelect label="Slot" name="slot_data[0].slot_id" value={values.slot_data?.[0]?.slot_id} options={slotOptions} onChange={(val) => setFieldValue("slot_data[0].slot_id", val)} onBlur={handleBlur} error={errors.slot_data?.[0]?.slot_id} touched={touched.slot_data?.[0]?.slot_id} />
-                  <CustomInput label="Quantity" name="slot_data[0].quantity" type="number" value={values.slot_data?.[0]?.quantity} onChange={handleChange} onBlur={handleBlur} error={errors.slot_data?.[0]?.quantity} touched={touched.slot_data?.[0]?.quantity} />
-                  <CustomSelect label="Method" name="slot_data[0].method" value={values.slot_data?.[0]?.method} options={[{ label: "Direct", value: 1 }, { label: "Distributor", value: 2 }]} onChange={(val) => setFieldValue("slot_data[0].method", val)} onBlur={handleBlur} error={errors.slot_data?.[0]?.method} touched={touched.slot_data?.[0]?.method} />
-                  <CustomInput label="Start Date" name="slot_data[0].start_date" type="date" value={values.slot_data?.[0]?.start_date} onChange={handleChange} onBlur={handleBlur} error={errors.slot_data?.[0]?.start_date} touched={touched.slot_data?.[0]?.start_date} />
+                  <CustomSelect
+                    label="Slot"
+                    name="slot_data[0].slot_id"
+                    value={values.slot_data?.[0]?.slot_id}
+                    options={slotOptions}
+                    onChange={(val) => setFieldValue("slot_data[0].slot_id", val)}
+                    onBlur={handleBlur}
+                    error={getSlotError("slot_id")}
+                    touched={getSlotTouched("slot_id")}
+                  />
+                  <CustomInput
+                    label="Quantity"
+                    name="slot_data[0].quantity"
+                    type="number"
+                    value={values.slot_data?.[0]?.quantity}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={getSlotError("quantity")}
+                    touched={getSlotTouched("quantity")}
+                  />
+                  <CustomSelect
+                    label="Method"
+                    name="slot_data[0].method"
+                    value={values.slot_data?.[0]?.method}
+                    options={[
+                      { label: "Direct", value: 1 },
+                      { label: "Distributor", value: 2 },
+                    ]}
+                    onChange={(val) => setFieldValue("slot_data[0].method", val)}
+                    onBlur={handleBlur}
+                    error={getSlotError("method")}
+                    touched={getSlotTouched("method")}
+                  />
+                  <CustomInput
+                    label="Start Date"
+                    name="slot_data[0].start_date"
+                    type="date"
+                    value={values.slot_data?.[0]?.start_date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={getSlotError("start_date")}
+                    touched={getSlotTouched("start_date")}
+                  />
                 </>
               )}
-              <CustomSelect label="Select Line" name="line_id" value={values.line_id} options={lineOptions} onChange={(val) => setFieldValue("line_id", val)} onBlur={handleBlur} error={errors.line_id} touched={touched.line_id} />
-              <CustomSelect label="Price Tag" name="price_tag_id" value={values.price_tag_id} options={priceOptions} onChange={(val) => setFieldValue("price_tag_id", val)} onBlur={handleBlur} error={errors.price_tag_id} touched={touched.price_tag_id} />
-              <CustomSelect label="Pay Type" name="pay_type" value={values.pay_type} options={[{ label: "Daily", value: 1 }, { label: "Monthly", value: 2 }]} onChange={(val) => setFieldValue("pay_type", val)} onBlur={handleBlur} error={errors.pay_type} touched={touched.pay_type} />
+
+              <CustomSelect
+                label="Select Line"
+                name="line_id"
+                value={values.line_id}
+                options={lineOptions}
+                onChange={(val) => setFieldValue("line_id", val)}
+                onBlur={handleBlur}
+                error={errors.line_id}
+                touched={touched.line_id}
+              />
+              <CustomSelect
+                label="Price Tag"
+                name="price_tag_id"
+                value={values.price_tag_id}
+                options={priceOptions}
+                onChange={(val) => setFieldValue("price_tag_id", val)}
+                onBlur={handleBlur}
+                error={errors.price_tag_id}
+                touched={touched.price_tag_id}
+              />
+              <CustomSelect
+                label="Pay Type"
+                name="pay_type"
+                value={values.pay_type}
+                options={[
+                  { label: "Daily", value: 1 },
+                  { label: "Monthly", value: 2 },
+                ]}
+                onChange={(val) => setFieldValue("pay_type", val)}
+                onBlur={handleBlur}
+                error={errors.pay_type}
+                touched={touched.pay_type}
+              />
             </>
           )}
 
