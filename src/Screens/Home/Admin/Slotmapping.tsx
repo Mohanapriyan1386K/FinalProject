@@ -2,7 +2,7 @@ import { useEffect, useState, type SetStateAction } from "react";
 import { Table, Spin, Select } from "antd";
 import { ViwslotMap } from "../../../Services/ApiService";
 import { getDecryptedCookie } from "../../../Uitils/Cookeis";
-import { Box, Paper, styled, Typography } from "@mui/material";
+import { Box, Paper,Typography } from "@mui/material";
 import CustomButton from "../../../Compontents/CoustomButton";
 import { useNavigate } from "react-router-dom";
 import CustomInputField from "../../../Compontents/CoustomInputFiled";
