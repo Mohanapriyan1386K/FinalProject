@@ -10,9 +10,9 @@ export const AuthPrivate = () => {
   if (!token) return <Outlet />;
 
   // Redirect based on role
-  if (type === "1") return <Navigate to="/admin-dashboard" replace />;
-  if (type === "2") return <Navigate to="/vendor-dashboard" replace />;
-  if (type === "3") return <Navigate to="/user-dashboard" replace />;
+  if (type === "1") return <Navigate to="/admindashboard" replace />;
+  if (type === "2") return <Navigate to="/vendordashboard" replace />;
+  if (type === "3") return <Navigate to="/userdashboard" replace />;
 
   return <Navigate to="/" replace />;
 };
@@ -22,7 +22,7 @@ export const AdminPrivate = () => {
   const token = Cookies.get("user_token");
   const type = Cookies.get("user_type")?.toString();
 
-  return token && type === "1" ? <Outlet /> : <Navigate to="/login" replace />;
+  return token && type === "1" ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 // Vendor route guard
@@ -30,7 +30,7 @@ export const VendorPrivate = () => {
   const token = Cookies.get("user_token");
   const type = Cookies.get("user_type")?.toString();
 
-  return token && type === "2" ? <Outlet /> : <Navigate to="/login" replace />;
+  return token && type === "2" ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 // User route guard
@@ -38,22 +38,28 @@ export const UserPrivate = () => {
   const token = Cookies.get("user_token");
   const type = Cookies.get("user_type")?.toString();
 
-  return token && type === "3" ? <Outlet /> : <Navigate to="/login" replace />;
+  return token && type === "3" ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 // Type for wrapper routes like OTP and Reset Password
 interface AuthWrapperProps {
   children: ReactNode;
+  type: "otp" | "reset"
 }
 
 // Reset password route protection
-export const PasswordAuth = ({ children }: AuthWrapperProps) => {
-  const key = Cookies.get("reset_key");
-  return key ? children : <Navigate to="/forget-password" replace />;
+export const AuthGuard: React.FC<AuthWrapperProps> = ({ children, type }) => {
+  const isOtpVerified = Cookies.get("otp_verify");
+  const hasResetKey = Cookies.get("reset_key");
+
+  if (type === "otp" && !isOtpVerified) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (type === "reset" && !hasResetKey) {
+    return <Navigate to="/forget-password" replace />;
+  }
+
+  return <>{children}</>;
 };
 
-// OTP route protection
-export const OtpAuth = ({ children }: AuthWrapperProps) => {
-  const otp = Cookies.get("otp_verify");
-  return otp ? children : <Navigate to="/login" replace />;
-};

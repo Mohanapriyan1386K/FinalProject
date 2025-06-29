@@ -17,34 +17,14 @@ export const resetpassword = (data: any) => {
 };
 
 export const fetchUserList = (
-  page: number = 1,
-  size: number = 10,
-  token: string
-) => {
-  const params = new URLSearchParams();
-  params.append("token", token);
-
-  return axiosInstance.post(
-    `/milk-api/user/list-users?page=${page}&size=${size}`,
-    params.toString(),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-};
-
-export const fetchfilteredUserList = (
-  page: number = 1,
-  size: number = 10,
-  payload: any
+  page: number,
+  size: number,
+  payload:any
 ) => {
   return axiosInstance.post(
-    `/milk-api/user/list-users?page=${page}&size=${size}`,
-    payload
-  );
+    `/milk-api/user/list-users?page=${page}&size=${size}`,payload);
 };
+
 
 export const adduser = (data: any) => {
   return axiosInstance.post("/milk-api/user/create-user", data);
@@ -157,10 +137,33 @@ export const list_inventory_log = (payload: any,page:number,size:number) => {
   return axiosInstance.post(`/milk-api/inventory/list-inventory-log?pages=${page}&${size}`, payload);
 };
 
-export const Logouts = (payload: any) => {
-  return axiosInstance.post("/milk-api/auth/logout", payload);
-};
+
 
 export const ViwslotMap=(payload:any,page:number,size:number)=>{
     return axiosInstance.post(`/milk-api/milk-sales/list-slot-mapping?pages=${page}&${size}`,payload)
 }
+
+export const ViwslotMapview=(payload:any)=>{
+    return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
+}
+
+
+export const distributorList=(payload:any)=>{
+    return axiosInstance.post("/milk-api/slot-assign/get-distributer-line",payload)
+}
+
+export const getRouteDetails = (
+  page: number = 1,
+  size: number = 5,
+  payload: any
+) => {
+  return axiosInstance.post(`/milk-api/slot-assign/list-assigned-slot?page=${page}&size=${size}`,payload);
+};
+
+
+
+// Logout Api call
+export const Logout = (payload: any) => {
+  return axiosInstance.post("/milk-api/auth/logout", payload);
+};
+

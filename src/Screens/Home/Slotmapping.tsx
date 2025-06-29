@@ -1,11 +1,13 @@
 import { useEffect, useState, type SetStateAction } from "react";
-import { Table, Spin, Select } from "antd";
-import { ViwslotMap } from "../../../Services/ApiService";
-import { getDecryptedCookie } from "../../../Uitils/Cookeis";
-import { Box, Paper,Typography } from "@mui/material";
-import CustomButton from "../../../Compontents/CoustomButton";
+import { Table, Spin, Select, Button, Modal } from "antd";
+import { ViwslotMap, ViwslotMapview,} from "../../Services/ApiService";
+import { getDecryptedCookie } from "../../Uitils/Cookeis";
+import { Box, Paper, Typography } from "@mui/material";
+import CustomButton from "../../Compontents/CoustomButton";
 import { useNavigate } from "react-router-dom";
-import CustomInputField from "../../../Compontents/CoustomInputFiled";
+import CustomInputField from "../../Compontents/CoustomInputFiled";
+
+import { EyeOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -30,119 +32,158 @@ export interface SlotLog {
   is_assigned: string;
 }
 
-const columns = [
-  {  title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Scheduled Date
-      </span>
-    ), dataIndex: "customer_name", key: "customer_name" },
-  {
-      title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Assigned
-      </span>
-    ),
-
-    dataIndex: "assigned_name",
-    key: "assigned_name",
-    render: (text: string | null) => text ?? "Unassigned",
-  },
-  {  title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Slot
-      </span>
-    ),
- },
-  {
-      title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Method
-      </span>
-    ),
-    dataIndex: "milk_given_type",
-    key: "milk_given_type",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Scheduled Date
-      </span>
-    ),
-
-    dataIndex: "scheduled_date",
-    key: "scheduled_date",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Milk Given Status
-      </span>
-    ),
-
-    dataIndex: "milk_given_status",
-    key: "milk_given_status",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Given Qty
-      </span>
-    ),
-    dataIndex: "milk_given_quantity",
-    key: "milk_given_quantity",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Actual Qty (L)
-      </span>
-    ),
-    dataIndex: "actual_milk_quantity",
-    key: "actual_milk_quantity",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Pay Mode (L)
-      </span>
-    ),
-    dataIndex: "user_pay_mode",
-    key: "user_pay_mode",
-    render: (mode: number) =>
-      mode === 1 ? "Cash" : mode === 2 ? "Online" : "Other",
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Unit Price
-      </span>
-    ),
-    dataIndex: "unit_price",
-    key: "unit_price",
-    render: (price: string) => `₹${price}`,
-  },
-  {
-    title: (
-      <span style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}>
-        Status
-      </span>
-    ),
-    dataIndex: "status",
-    key: "status",
-    render: (value: number) => (
-      <span
-        style={{
-          color: value === 1 ? "green" : "red",
-          fontWeight: 600,
-        }}
-      >
-        {value === 1 ? "Active" : "Inactive"}
-      </span>
-    ),
-  },
-];
-
 function Slotmapping() {
+  const columns = [
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Coustomer Name
+        </span>
+      ),
+      dataIndex: "customer_name",
+      key: "customer_name",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Assigned
+        </span>
+      ),
+
+      dataIndex: "assigned_name",
+      key: "assigned_name",
+      render: (text: string | null) => text ?? "Unassigned",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Slot
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Method
+        </span>
+      ),
+      dataIndex: "milk_given_type",
+      key: "milk_given_type",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Scheduled Date
+        </span>
+      ),
+
+      dataIndex: "scheduled_date",
+      key: "scheduled_date",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Milk Given Status
+        </span>
+      ),
+
+      dataIndex: "milk_given_status",
+      key: "milk_given_status",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Given Qty
+        </span>
+      ),
+      dataIndex: "milk_given_quantity",
+      key: "milk_given_quantity",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Actual Qty (L)
+        </span>
+      ),
+      dataIndex: "actual_milk_quantity",
+      key: "actual_milk_quantity",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Pay Mode (L)
+        </span>
+      ),
+      dataIndex: "user_pay_mode",
+      key: "user_pay_mode",
+      render: (mode: number) =>
+        mode === 1 ? "Cash" : mode === 2 ? "Online" : "Other",
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Unit Price
+        </span>
+      ),
+      dataIndex: "unit_price",
+      key: "unit_price",
+      render: (price: string) => `₹${price}`,
+    },
+    {
+      title: (
+        <span
+          style={{ fontSize: "14px", fontWeight: "bold", color: "#2e7d32" }}
+        >
+          Status
+        </span>
+      ),
+      dataIndex: "status",
+      key: "status",
+      render: (value: number) => (
+        <span
+          style={{
+            color: value === 1 ? "green" : "red",
+            fontWeight: 600,
+          }}
+        >
+          {value === 1 ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
+
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: SlotLog) => (
+        <Button
+          type="link"
+          icon={<EyeOutlined />}
+          onClick={() => handeleview(record)}
+        ></Button>
+      ),
+    },
+  ];
+
   const navigate = useNavigate();
   const userdata = getDecryptedCookie("user_token");
 
@@ -155,6 +196,7 @@ function Slotmapping() {
   const [date, setDate] = useState("2025-06-25");
   const [coustomerId, setcoustomerId] = useState<any>();
   const [slotid, setSlotId] = useState<any>();
+  const [Modelopen,setModelopen]=useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,6 +263,16 @@ function Slotmapping() {
 
   const handleCustomerId = (e: React.ChangeEvent<HTMLInputElement>) => {
     setcoustomerId(e.target.value);
+  };
+
+  const handeleview = (record: SlotLog) => {
+     setModelopen(true)
+     const payload=new FormData()
+     payload.append("token", userdata?.token || "");
+     payload.append("customer_id",record.customer_id?.toString())
+     ViwslotMapview(payload).then((res)=>{
+        console.log(res.data.data)
+     })
   };
 
   return (
@@ -291,12 +343,7 @@ function Slotmapping() {
             onSearch={(value) => setSlotId(value)}
             showSearch
             allowClear
-            filterOption={(input, option) =>
-              (option?.children as unknown as string)
-                .toLowerCase()
-                .includes(input.toLowerCase())
-            }
-            notFoundContent={null}
+            optionFilterProp="children"
           >
             <Option value="1">Morning</Option>
             <Option value="2">Evening</Option>
@@ -356,6 +403,13 @@ function Slotmapping() {
           />
         </div>
       )}
+
+       <Modal
+        title="Basic Modal"
+        open={Modelopen}
+        onOk={()=>{setModelopen(false)}}
+      >   
+      </Modal>
     </div>
   );
 }

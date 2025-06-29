@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { setEncryptedCookie } from "../../Uitils/Cookeis";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
+import { saltkey } from "../../../public/config";
 
 // Yup validation schema
 const validationSchema = Yup.object({
@@ -19,70 +20,57 @@ const validationSchema = Yup.object({
 });
 
 function Logins() {
-
   const navigate = useNavigate();
+
+  // Auto-login redirect if token already present
   useEffect(() => {
-  const token = Cookies.get("user_token");
-  const userType = Cookies.get("user_type");
+    const token = Cookies.get("user_token");
+    const userType = Cookies.get("user_type");
 
-  if (token && userType) {
-    // Redirect based on user type
-    if (userType === "1") {
-      navigate("/admin-dashboard");
-    } else if (userType === "2") {
-      navigate("/vendor-dashboard");
-    } else if (userType === "3") {
-      navigate("/user-dashboard");
-    }
-  }
-}, []);
-
-  const handleLogin = (values: { user_name: string; password: string }) => {
-  const formdatas = new FormData();
-  formdatas.append("user_name", values.user_name);
-  formdatas.append("password", values.password);
-  formdatas.append("device_type", "3");
-  formdatas.append(
-    "auth_code",
-    sha1("AaH0322A@B&H@R!!akLLo012VSzXycAA1" + values.user_name)
-  );
-  console.log("rendering")
-  logindata(formdatas)
-    .then((res) => {
-      if (res.data.token) {
-        const userData = {
-          token: res.data.token,
-          user_id: res.data.user_id,
-          user_name: res.data.user_name,
-          user_type: res.data.user_type,
-          is_daily: res.data.is_daily,
-          is_occasional: res.data.is_occasional,
-        };
-
-        setEncryptedCookie("user_token", userData);
-        Cookies.set("user_type", res.data.user_type.toString());
-        toast.success("Login successful!");
-
-        const userType = res.data.user_type.toString();
-        if (userType === "1") {
-          navigate("/admin-dashboard");
-        } else if (userType === "2") {
-          navigate("/vendor-dashboard");
-        } else if (userType === "3") {
-          navigate("/user-dashboard");
-        } else {
-          toast.error("Invalid user type");
-        }
-      } else {
-        toast.error("Invalid credentials or missing token");
+    if (token && userType) {
+      if (userType === "1") {
+        navigate("/dashboard");
       }
-    })
-    .catch((error) => {
-      console.error("Login error", error.response?.data || error.message);
-      toast.error("Login failed. Please try again");
-    });
-};
+    }
+  }, [navigate]);
 
+  // Login handler
+  const handleLogin = (values: { user_name: string; password: string }) => {
+    const formdatas = new FormData();
+    formdatas.append("user_name", values.user_name);
+    formdatas.append("password", values.password);
+    formdatas.append("device_type", "3");
+    formdatas.append("auth_code", sha1(saltkey + values.user_name));
+
+    logindata(formdatas)
+      .then((res) => {
+        if (res.data.token) {
+          const userData = {
+            token: res.data.token,
+            user_id: res.data.user_id,
+            user_name: res.data.user_name,
+            user_type: res.data.user_type,
+            is_daily: res.data.is_daily,
+            is_occasional: res.data.is_occasional,
+          };
+
+          setEncryptedCookie("user_token", userData);
+          Cookies.set("user_type", res.data.user_type.toString());
+          toast.success("Login successful!");
+
+          const userType = res.data.user_type.toString();
+          if (userType === "1") {
+            navigate("/dashboard");
+          }
+        } else {
+          toast.error("Invalid credentials or missing token");
+        }
+      })
+      .catch((error) => {
+        console.error("Login error", error.response?.data || error.message);
+        toast.error("Login failed. Please try again");
+      });
+  };
 
   const formik = useFormik({
     initialValues: { user_name: "", password: "" },

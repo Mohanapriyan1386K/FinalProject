@@ -1,6 +1,6 @@
 import "./App.css";
 import { ToastContainer } from "react-toastify";
-import AppRouterProvider from "./Routercopy/MainRoute";
+import AppRouterProvider from "./Router/MainRoute";
 
 function App() {
   return (

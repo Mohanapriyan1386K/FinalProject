@@ -1,14 +1,20 @@
+// UserForm.tsx
 import React, { useEffect, useState } from "react";
 import { useFormik, type FormikErrors } from "formik";
 import * as Yup from "yup";
-import { Box, Typography } from "@mui/material";
-import { message, Spin } from "antd";
-import CustomInput from "../CoustomInputFiled";
+import { message, notification, Spin } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { Box, Typography, Button } from "@mui/material";
+import CustomInput from "./CoustomInputFiled";
 import CustomSelect from "./CustomSelect";
-import CustomButton from "../CoustomButton";
-import { getLinesDropDown, updateUser } from "../../Services/ApiService";
-import { getDecryptedCookie } from "../../Uitils/Cookeis";
-import { PriceTagData } from "../../Services/Data";
+import { getDecryptedCookie } from "../Uitils/Cookeis";
+import { PriceTagData } from "../Services/Data";
+import {
+  createUser,
+  updateUser,
+  getUserById,
+  getLinesDropDown,
+} from "../Services/ApiService";
 
 interface Slot {
   slot_id: number;
@@ -17,24 +23,20 @@ interface Slot {
   start_date: string;
 }
 
-interface User {
-  id: number;
+interface FormValues {
   name: string;
   user_name: string;
   email: string;
   phone: string;
   alternative_number: string;
-  user_type: number;
+  password: string;
+  user_type: string | number;
   customer_type: number;
-  line_id: number;
   price_tag_id: number;
+  line_id: number;
   pay_type: number;
   slot_data: Slot[];
-}
-
-interface Props {
-  user: User;
-  onBack: () => void;
+  isEdit: boolean;
 }
 
 const validationSchema = Yup.object({
@@ -47,86 +49,125 @@ const validationSchema = Yup.object({
   alternative_number: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian phone number")
     .notRequired(),
+  password: Yup.string().when("isEdit", {
+    is: false,
+    then: (schema) => schema.required("Password is required"),
+  }),
   user_type: Yup.number().required().typeError("Select user type"),
   customer_type: Yup.number().required().typeError("Select customer type"),
   price_tag_id: Yup.number().required().typeError("Select price tag"),
   pay_type: Yup.number().required().typeError("Select pay type"),
   line_id: Yup.number().required("Line is required"),
- slot_data: Yup.array().when(["user_type", "customer_type"], {
-      is: (user_type: number, customer_type: number) =>
-        user_type === 5 && customer_type === 1,
-      then: () =>
-        Yup.array()
-          .of(
-            Yup.object().shape({
-              slot_id: Yup.number(),
-              quantity: Yup.number().nullable(),
-              method: Yup.number().nullable(),
-              start_date: Yup.string().nullable(),
-            })
-          )
-          .test(
-            "at-least-one-slot",
-            "At least one slot (morning or evening) must be filled",
-            (slots = []) =>
-              slots.some((slot) => !!slot.quantity && !!slot.method)
-          ),
-      otherwise: () => Yup.mixed().notRequired(),
-    }),
+  slot_data: Yup.array().when(["user_type", "customer_type"], {
+    is: (user_type: number, customer_type: number) =>
+      user_type === 5 && customer_type === 1,
+    then: () =>
+      Yup.array()
+        .of(
+          Yup.object().shape({
+            slot_id: Yup.number(),
+            quantity: Yup.number().nullable(),
+            method: Yup.number().nullable(),
+            start_date: Yup.string().nullable(),
+          })
+        )
+        .test(
+          "at-least-one-slot",
+          "At least one slot (morning or evening) must be filled",
+          (slots = []) => slots.some((slot) => !!slot.quantity && !!slot.method)
+        ),
+    otherwise: () => Yup.mixed().notRequired(),
+  }),
 });
 
-const EditUserform: React.FC<Props> = ({ user, onBack }) => {
+const UserForm: React.FC = () => {
+  const navigate = useNavigate();
+  const { user_id } = useParams();
+  const isEdit = !!user_id;
+
   const [priceOptions, setPriceOptions] = useState([]);
   const [lineOptions, setLineOptions] = useState([]);
-  const [loadingDropdowns, setLoadingDropdowns] = useState(true);
+  const [isLoadingDropdowns, setIsLoadingDropdowns] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const token = getDecryptedCookie("user_token").token;
 
-  const formik = useFormik<User>({
+  const slotOptions = [
+    { label: "Morning (09:15 - 13:00)", value: 1 },
+    { label: "Evening (14:30 - 19:14)", value: 2 },
+  ];
+
+  const token = getDecryptedCookie("user_token")?.token;
+
+  const formik = useFormik<FormValues>({
     initialValues: {
-      name: user.name,
-      user_name: user.user_name,
-      email: user.email,
-      phone: user.phone,
-      alternative_number: user.alternative_number,
-      user_type: user.user_type,
-      customer_type: user.customer_type,
-      price_tag_id: user.price_tag_id,
-      line_id: user.line_id,
-      pay_type: user.pay_type,
-      slot_data: user.slot_data?.length
-        ? user.slot_data
-        : [
-            {
-              slot_id: 0,
-              quantity: 0,
-              method: 0,
-              start_date: "",
-            },
-          ],
-      id: user.id,
+      name: "",
+      user_name: "",
+      email: "",
+      phone: "",
+      alternative_number: "",
+      password: "",
+      user_type: "",
+      customer_type: 2,
+      price_tag_id: 0,
+      line_id: 0,
+      pay_type: 0,
+      slot_data: [{ slot_id: 0, quantity: 0, method: 0, start_date: "" }],
+      isEdit,
     },
-    enableReinitialize: true,
     validationSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
-      const payload = {
-        ...values,
+      const payload: any = {
         token,
-        user_id: user.id,
+        name: values.name,
+        user_name: values.user_name,
+        email: values.email,
+        phone: values.phone,
+        alternative_number: values.alternative_number,
+        user_type: Number(values.user_type),
+        customer_type: Number(values.customer_type),
+        line_id: Number(values.line_id),
+        price_tag_id: Number(values.price_tag_id),
+        pay_type: Number(values.pay_type),
       };
 
+      if (!isEdit && values.password) {
+        payload.password = values.password;
+      }
+
+      const isRegularCustomer = Number(values.customer_type) === 1;
+      if (isRegularCustomer && Array.isArray(values.slot_data)) {
+        const cleanedSlotData = values.slot_data.filter(
+          (slot) =>
+            slot.slot_id && slot.quantity && slot.method && slot.start_date
+        );
+        if (cleanedSlotData.length > 0) {
+          payload.slot_data = cleanedSlotData.map((slot) => ({
+            slot_id: Number(slot.slot_id),
+            quantity: Number(slot.quantity),
+            method: Number(slot.method),
+            start_date: slot.start_date,
+          }));
+        }
+      }
+
+      if (isEdit) {
+        payload.user_id = user_id;
+      }
+
+      setIsSubmitting(true);
       try {
-        setIsSubmitting(true);
-        const res = await updateUser(payload);
+        const res = isEdit
+          ? await updateUser(payload)
+          : await createUser(payload);
         if (res.data?.status === 1) {
-          message.success("User updated successfully");
-          onBack();
+          message.success(isEdit ? "User updated!" : "User added!");
+          navigate("/admin-dashboard/users");
         } else {
-          message.error(res.data?.msg || "Update failed");
+          message.error(res.data?.msg || "Operation failed");
         }
       } catch (err) {
         console.error(err);
-        message.error("Unexpected error occurred");
+        notification.error({ message: "Unexpected error occurred." });
       } finally {
         setIsSubmitting(false);
       }
@@ -138,13 +179,11 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
     errors,
     touched,
     handleChange,
-    handleBlur,
     handleSubmit,
+    handleBlur,
     setFieldValue,
+    setValues,
   } = formik;
-
-  const isAdmin = values.user_type === 2;
-  const isRegularCustomer = values.customer_type === 1;
 
   useEffect(() => {
     (async () => {
@@ -157,18 +196,21 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
           })) || []
         );
       } catch {
-        message.error("Failed to load price tags");
+        message.error("Failed to load price tag dropdowns");
       } finally {
-        setLoadingDropdowns(false);
+        setIsLoadingDropdowns(false);
       }
     })();
   }, []);
 
   useEffect(() => {
     if (!values.user_type) return;
+    const user = getDecryptedCookie("user_token");
+    if (!user?.token) return;
+
     const formData = new FormData();
-    formData.append("token", token);
-    formData.append("type", "1");
+    formData.append("token", user.token);
+    formData.append("type", user.user_type === 4 ? "2" : "1");
 
     (async () => {
       try {
@@ -181,42 +223,91 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
             }))
           );
         } else {
-          message.error(res.data.msg || "Line fetch failed");
+          message.error(res.data.msg || "Failed to fetch line data.");
         }
       } catch (error) {
-        console.error("Line fetch error:", error);
+        console.error("Line dropdown error:", error);
+        message.error("Error loading line data.");
       }
     })();
   }, [values.user_type]);
 
-  const slotOptions = [
-    { label: "Morning (09:15 - 13:00)", value: 1 },
-    { label: "Evening (14:30 - 19:14)", value: 2 },
-  ];
+  useEffect(() => {
+    if (!user_id || !token) return;
+    (async () => {
+      try {
+        const formData = new FormData();
+        formData.append("token", token);
+        formData.append("user_id", user_id.toString());
+        const res = await getUserById(formData);
+        if (res.data.status === 1) {
+          const userData = res.data.data;
+          setValues({
+            name: userData.name,
+            user_name: userData.user_name,
+            email: userData.email,
+            phone: userData.phone,
+            alternative_number: userData.alternative_number || "",
+            password: "",
+            user_type: String(userData.user_type),
+            customer_type: Number(userData.customer_type),
+            price_tag_id: Number(userData.price_tag_id),
+            line_id: Number(userData.line_id),
+            pay_type: Number(userData.pay_type),
+            slot_data: userData.slot_data || [],
+            isEdit: true,
+          });
+        } else {
+          message.error(res.data.msg || "Failed to fetch user data");
+        }
+      } catch (err) {
+        console.error("Error loading user:", err);
+        message.error("Something went wrong loading user data");
+      }
+    })();
+  }, [user_id, token]);
 
-  // Helper functions for nested field validation
+  const isAdmin = values.user_type?.toString() === "2";
+  const isRegularCustomer = values.customer_type?.toString() === "1";
+
   const getSlotError = (key: keyof Slot) => {
-    const slotError = errors.slot_data?.[0];
-    return typeof slotError === "object"
-      ? (slotError as FormikErrors<Slot>)[key]
+    const slotErr = errors.slot_data?.[0];
+    return typeof slotErr === "object"
+      ? (slotErr as FormikErrors<Slot>)[key]
       : undefined;
   };
 
   const getSlotTouched = (key: keyof Slot) => {
-    const slotTouched = touched.slot_data?.[0];
-    return typeof slotTouched === "object" ? slotTouched[key] : undefined;
+    const slotTouch = touched.slot_data?.[0];
+    return typeof slotTouch === "object" ? slotTouch[key] : undefined;
   };
 
   return (
-    <Box sx={{ maxWidth: 700, mx: "auto", p: 3 }}>
-      <Typography variant="h4" mb={2}>
-        Edit User
-      </Typography>
+    <Box sx={{ maxWidth: 700, margin: "auto", padding: 3 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4">
+          {isEdit ? "Edit User" : "Add User"}
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/admin-dashboard/users")}
+          sx={{ px: 3 }}
+        >
+          Back
+        </Button>
+      </Box>
 
-      {loadingDropdowns ? (
-        <Spin />
+      {isLoadingDropdowns ? (
+        <Box textAlign="center" mt={5}>
+          <Spin size="large" />
+        </Box>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <CustomInput
             label="Name"
             name="name"
@@ -263,6 +354,19 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
             touched={touched.alternative_number}
           />
 
+          {!isEdit && (
+            <CustomInput
+              label="Password"
+              name="password"
+              type="password"
+              value={values.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.password}
+              touched={touched.password}
+            />
+          )}
+
           <CustomSelect
             label="User Type"
             name="user_type"
@@ -302,7 +406,9 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
                     name="slot_data[0].slot_id"
                     value={values.slot_data?.[0]?.slot_id}
                     options={slotOptions}
-                    onChange={(val) => setFieldValue("slot_data[0].slot_id", val)}
+                    onChange={(val) =>
+                      setFieldValue("slot_data[0].slot_id", val)
+                    }
                     onBlur={handleBlur}
                     error={getSlotError("slot_id")}
                     touched={getSlotTouched("slot_id")}
@@ -325,7 +431,9 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
                       { label: "Direct", value: 1 },
                       { label: "Distributor", value: 2 },
                     ]}
-                    onChange={(val) => setFieldValue("slot_data[0].method", val)}
+                    onChange={(val) =>
+                      setFieldValue("slot_data[0].method", val)
+                    }
                     onBlur={handleBlur}
                     error={getSlotError("method")}
                     touched={getSlotTouched("method")}
@@ -344,7 +452,7 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
               )}
 
               <CustomSelect
-                label="Select Line"
+                label="Line"
                 name="line_id"
                 value={values.line_id}
                 options={lineOptions}
@@ -379,9 +487,15 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
             </>
           )}
 
-          <Box mt={3} display="flex" gap={2}>
-            <CustomButton buttonName="Update" type="submit" disabled={isSubmitting} />
-            <CustomButton buttonName="Cancel" variant="outlined" type="button" onClick={onBack} />
+          <Box mt={3}>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={isSubmitting}
+              fullWidth
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </Button>
           </Box>
         </form>
       )}
@@ -389,4 +503,4 @@ const EditUserform: React.FC<Props> = ({ user, onBack }) => {
   );
 };
 
-export default EditUserform;
+export default UserForm;

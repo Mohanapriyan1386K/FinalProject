@@ -3,7 +3,7 @@ import Logins from "../Screens/Auth/Logins";
 import ForgetPassword from "../Screens/Auth/ForgetPassword";
 import VerifyOtp from "../Screens/Auth/VerifyOtp";
 import Resetpassword from "../Screens/Auth/Resetpassword";
-import {  OtpAuth, PasswordAuth } from "./PrivateRouter";
+import {  AuthGuard } from "./PrivateRouter";
 
 const authRoutes: RouteObject[] = [
   { path: "/", element: <Logins /> },
@@ -11,17 +11,17 @@ const authRoutes: RouteObject[] = [
   {
     path: "verify-otp",
     element: (
-      <OtpAuth>
-        <VerifyOtp />
-      </OtpAuth>
+    <AuthGuard type="otp">
+      <VerifyOtp />
+    </AuthGuard>
     ),
   },
   {
     path: "reset-password",
     element: (
-      <PasswordAuth>
-        <Resetpassword />
-      </PasswordAuth>
+    <AuthGuard type="reset">
+      <Resetpassword />
+    </AuthGuard>
     ),
   },
 ];

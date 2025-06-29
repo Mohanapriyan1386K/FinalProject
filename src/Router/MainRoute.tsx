@@ -4,8 +4,6 @@ import { createHashRouter, RouterProvider} from "react-router-dom";
 import {
   AuthPrivate,
   AdminPrivate,
-  VendorPrivate,
-  UserPrivate,
 } from "./PrivateRouter";
 
 // Auth route definitions
@@ -15,28 +13,17 @@ import authRoutes from "./AuthRoutes";
 import PageNotFound from "../Screens/Auth/PageNotFound";
 
 // Role-based child routes
-import { AdminRouter, VendorRouter, UserRouter } from "./Home";
+import { AdminRouter} from "./Home";
 
 const router = createHashRouter([
   {
-    path: "/",
     element: <AuthPrivate />,
     children: authRoutes,
   },
   {
-    path: "/admin-dashboard",
+    path: "/dashboard",
     element: <AdminPrivate />,
     children: AdminRouter,
-  },
-  {
-    path: "/vendor-dashboard",
-    element: <VendorPrivate />,
-    children: VendorRouter,
-  },
-  {
-    path: "/user-dashboard",
-    element: <UserPrivate />,
-    children: UserRouter,
   },
   {
     path: "*",

@@ -6,8 +6,8 @@ import {
   UpdateInventory,
   AddInventory,
   list_inventory_log,
-} from "../../../Services/ApiService";
-import { getDecryptedCookie } from "../../../Uitils/Cookeis";
+} from "../../Services/ApiService";
+import { getDecryptedCookie } from "../../Uitils/Cookeis";
 import {
   Card,
   Typography,
@@ -31,12 +31,12 @@ import {
   EditOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import InventoryLineChart from "../../../Compontents/Admin/InventoryLineChart";
+import InventoryLineChart from "../../Compontents/InventoryLineChart";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
-import {useNavigate} from "react-router-dom"
-import CustomButton from "../../../Compontents/CoustomButton";
+import { useNavigate } from "react-router-dom";
+import CustomButton from "../../Compontents/CoustomButton";
 
 interface SlotData {
   date: string;
@@ -97,14 +97,14 @@ const validationSchema = Yup.object({
   total_quantity: Yup.number().required("Total quantity is required"),
   comment: Yup.string().nullable(),
 });
+``;
 
 const customSpinIcon = (
   <LoadingOutlined style={{ fontSize: 32, color: "#1890ff" }} spin />
 );
 
 function AdminDashboard() {
-
-  const navigte=useNavigate()
+  const navigte = useNavigate();
   const [dailyInventory, setDailyInventory] = useState<DailyInventory | null>(
     null
   );
@@ -200,12 +200,7 @@ function AdminDashboard() {
       });
   };
 
-  // slot Mapping
-  const naviagteslotmap=()=>{
-    navigte("slotmapping")
-  } 
-
-  useEffect(() => {
+  const getallinventorydata = () => {
     const payload = new FormData();
     payload.append("token", token);
     Promise.all([
@@ -223,6 +218,15 @@ function AdminDashboard() {
       }
       setLoading(false);
     });
+  };
+
+  // slot Mapping
+  const naviagteslotmap = () => {
+    navigte("slotmapping");
+  };
+
+  useEffect(() => {
+     getallinventorydata()  
   }, [token]);
 
   useEffect(() => {
@@ -230,23 +234,22 @@ function AdminDashboard() {
     fetchInventoryList();
   }, [page, token]);
 
-const handeleview = (record: InventoryItem) => {
-  const payload = new FormData();
-  payload.append("token", token);
-  payload.append("inventory_id", record.id);
+  const handeleview = (record: InventoryItem) => {
+    const payload = new FormData();
+    payload.append("token", token);
+    payload.append("inventory_id", record.id);
 
-  list_inventory_log(payload,1,10).then((res) => {
-    const logs = res.data.data;
-    setlist_inventory_logs(logs);
-    navigte("inventorylistview", {
-      state: {
-        userid: record.id,
-        logs: logs,
-      },
+    list_inventory_log(payload, 1, 10).then((res) => {
+      const logs = res.data.data;
+      setlist_inventory_logs(logs);
+      navigte("inventorylistview", {
+        state: {
+          userid: record.id,
+          logs: logs,
+        },
+      });
     });
-  });
-};
-
+  };
 
   const handleEdit = (record: InventoryItem) => {
     formik.setValues({
@@ -413,9 +416,12 @@ const handeleview = (record: InventoryItem) => {
         key={slotId}
         title={`${getSlotLabel(Number(slotId))} Required Inventory`}
         style={{ width: 300, margin: 10, backgroundColor: "#e6f7ff" }}
-        
       >
-        <CustomButton buttonName="VIEW SLOTS"  variant="text" onClick={naviagteslotmap}   />
+        <CustomButton
+          buttonName="VIEW SLOTS"
+          variant="text"
+          onClick={naviagteslotmap}
+        />
         {items.map((item, index) => (
           <Row justify="space-between" key={index} style={{ marginBottom: 8 }}>
             <Typography.Text>
@@ -433,12 +439,9 @@ const handeleview = (record: InventoryItem) => {
   // DAILY INVENTORY TABLE
   return (
     <>
-      <Card
-        style={{ backgroundColor: "#f6ffed", textAlign: "center" }}
-        bordered={false}
-      >
-        <Typography.Title level={3} style={{ color: "#52c41a" }}>
-          DAILY INVENTORY
+      <Card style={{ backgroundColor: "#f6ffed" }}>
+        <Typography.Title level={3} style={{ fontWeight: 700 }}>
+          INVENTORY
         </Typography.Title>
       </Card>
 
