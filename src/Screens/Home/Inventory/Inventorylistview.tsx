@@ -1,7 +1,7 @@
 import { Table, Typography } from "antd";
 import { useLocation,useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
-import CustomButton from "../../Compontents/CoustomButton";
+import CustomButton from "../../../Compontents/CoustomButton";
 
 const columns1 = [
   {

@@ -58,11 +58,11 @@ const CustomInputField: React.FC<CustomInputProps> = ({
       sx={{
         height:1, // Adjust overall field height
         "& .MuiInputBase-root": {
-          height: 40, // Controls the outer input box height
+          height: 50, // Controls the outer input box height
           fontSize: "14px",
         },
         "& input": {
-          padding: "8px 10px", // Controls the input text height
+          padding: "10px 10px", // Controls the input text height
         },
         ...sx, // Allow override from props
       }}

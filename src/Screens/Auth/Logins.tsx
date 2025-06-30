@@ -22,18 +22,6 @@ const validationSchema = Yup.object({
 function Logins() {
   const navigate = useNavigate();
 
-  // Auto-login redirect if token already present
-  useEffect(() => {
-    const token = Cookies.get("user_token");
-    const userType = Cookies.get("user_type");
-
-    if (token && userType) {
-      if (userType === "1") {
-        navigate("/dashboard");
-      }
-    }
-  }, [navigate]);
-
   // Login handler
   const handleLogin = (values: { user_name: string; password: string }) => {
     const formdatas = new FormData();

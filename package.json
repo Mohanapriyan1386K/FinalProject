@@ -18,6 +18,7 @@
     "antd": "^5.26.1",
     "apexcharts": "^4.7.0",
     "axios": "^1.10.0",
+    "bootstrap": "^5.3.7",
     "crypto-js": "^4.2.0",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",

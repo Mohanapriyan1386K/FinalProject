@@ -31,3 +31,4 @@ export const clearCookie = (name: string) => {
 const isJsonString = (str: string): boolean => {
   return str.startsWith("{") || str.startsWith("[");
 };
+

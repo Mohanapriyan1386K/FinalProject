@@ -51,8 +51,21 @@ export const fetchLinesDropDown = (formData: FormData) => {
   return axiosInstance.post("/milk-api/drop-down/lines-drop-down", formData);
 };
 
+export const fetchPriceTagDropDown = (formData: FormData) => {
+  return axiosInstance.post("/milk-api/drop-down/price-tag-drop-down", formData);
+};
 
+export const fetchUserById = (payload: any) => {
+  return axiosInstance.post("/milk-api/user/view-user", payload);
+};
 
+export const handleEditUser = (payload: any) => {
+  return axiosInstance.post("/milk-api/user/edit-user", payload);
+};
+
+export const handleCreateUser = (formData: any) => {
+  return axiosInstance.post("/milk-api/user/create-user", formData);
+};
 //
 
 //delete or change status
@@ -98,7 +111,7 @@ export const getdailinventroy = (payload: any) => {
   );
 };
 
-export const RequiredInventroy = (payload: any) => {
+export const getDailymilkrequmernt = (payload: any) => {
   return axiosInstance.post(
     "/milk-api/dashboard/daily-milk-required-report",
     payload
@@ -143,9 +156,9 @@ export const ViwslotMap=(payload:any,page:number,size:number)=>{
     return axiosInstance.post(`/milk-api/milk-sales/list-slot-mapping?pages=${page}&${size}`,payload)
 }
 
-export const ViwslotMapview=(payload:any)=>{
-    return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
-}
+// export const ViwslotMapview=(payload:any)=>{
+//     return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
+// }
 
 
 export const distributorList=(payload:any)=>{

@@ -1,5 +1,5 @@
 import GlobalModal from "../../Compontents/GlobalModal";
-import { Descriptions, Modal, Table, Typography } from "antd";
+import { Descriptions,Table, Typography } from "antd";
 import React from "react";
 
 interface ViewUserModalProps {

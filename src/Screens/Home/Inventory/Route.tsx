@@ -1,10 +1,10 @@
-import { Table, Typography, Tag, message } from "antd";
+import { Table, Typography,message } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getDecryptedCookie } from "../../Uitils/Cookeis";
-import { getRouteDetails } from "../../Services/ApiService";
+import { getRouteDetails } from "../../../Services/ApiService";
 import { toast } from "react-toastify";
+import { useUserdata } from "../../../Hooks/UserHook";
 
 const { Title, Text } = Typography;
 
@@ -21,8 +21,7 @@ interface AssignedSlot {
 }
 
 const Route = () => {
-  const userdata = getDecryptedCookie("user_token");
-  const token = userdata?.token;
+  const token=useUserdata()
   const { state } = useLocation();
   const { distributorId, line_id, distributorName, lineName } = state || {};
 

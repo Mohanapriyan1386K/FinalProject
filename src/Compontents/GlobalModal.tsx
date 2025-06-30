@@ -1,5 +1,3 @@
-// src/components/ReusableModal.tsx
-
 import React from "react";
 import { Modal } from "antd";
 

@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   getdailinventroy,
-  RequiredInventroy as fetchRequiredInventory,
   Listinventory,
   UpdateInventory,
   AddInventory,
   list_inventory_log,
-} from "../../Services/ApiService";
-import { getDecryptedCookie } from "../../Uitils/Cookeis";
+} from "../../../Services/ApiService";
 import {
   Card,
   Typography,
@@ -31,12 +29,14 @@ import {
   EditOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import InventoryLineChart from "../../Compontents/InventoryLineChart";
+import InventoryLineChart from "../../../Compontents/InventoryLineChart";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import CustomButton from "../../Compontents/CoustomButton";
+import MilkRequiredReport from "./MilkRequiredReport";
+import { Box } from "@mui/material";
+import {useUserdata} from "../../../Hooks/UserHook"
 
 interface SlotData {
   date: string;
@@ -51,11 +51,6 @@ interface DailyInventory {
   evening_data: SlotData[];
 }
 
-interface RequiredInventoryItem {
-  total_quantity: string;
-  given_type: number;
-  slot_id: number;
-}
 
 interface InventoryItem {
   id: any;
@@ -108,9 +103,6 @@ function AdminDashboard() {
   const [dailyInventory, setDailyInventory] = useState<DailyInventory | null>(
     null
   );
-  const [requiredInventory, setRequiredInventory] = useState<
-    RequiredInventoryItem[]
-  >([]);
   const [inventoryList, setInventoryList] = useState<InventoryItem[]>([]);
   const [wholedata, setwholedata] = useState({
     is_add_status: 0,
@@ -126,8 +118,7 @@ function AdminDashboard() {
     InventoryTransaction[]
   >([]);
 
-  const userdata = getDecryptedCookie("user_token");
-  const token = userdata.token;
+  const token = useUserdata()
 
   // update formik
   const formik = useFormik({
@@ -205,24 +196,13 @@ function AdminDashboard() {
     payload.append("token", token);
     Promise.all([
       getdailinventroy(payload),
-      fetchRequiredInventory(payload),
-    ]).then(([inventoryRes, requiredRes]) => {
+    ]).then(([inventoryRes]) => {
       const invData = inventoryRes?.data?.data;
       if (Array.isArray(invData) && invData.length > 0) {
         setDailyInventory(invData[0]);
       }
-
-      const reqData = requiredRes?.data?.data;
-      if (Array.isArray(reqData)) {
-        setRequiredInventory(reqData);
-      }
       setLoading(false);
     });
-  };
-
-  // slot Mapping
-  const naviagteslotmap = () => {
-    navigte("slotmapping");
   };
 
   useEffect(() => {
@@ -233,6 +213,12 @@ function AdminDashboard() {
     if (!token) return;
     fetchInventoryList();
   }, [page, token]);
+
+
+
+
+
+
 
   const handeleview = (record: InventoryItem) => {
     const payload = new FormData();
@@ -378,64 +364,6 @@ function AdminDashboard() {
     },
   ];
 
-  // MILK REQUIREMENT
-
-  const getGivenTypeLabel = (type: number) => {
-    switch (type) {
-      case 1:
-        return "Vendor";
-      case 2:
-        return "Distributor";
-      default:
-        return "Unknown";
-    }
-  };
-
-  const getSlotLabel = (slotId: number) => {
-    switch (slotId) {
-      case 1:
-        return "Morning Slot";
-      case 2:
-        return "Evening Slot";
-      default:
-        return "Unknown Slot";
-    }
-  };
-
-  const renderAllSlotInventories = () => {
-    const grouped = requiredInventory.reduce<
-      Record<number, RequiredInventoryItem[]>
-    >((acc, item) => {
-      if (!acc[item.slot_id]) acc[item.slot_id] = [];
-      acc[item.slot_id].push(item);
-      return acc;
-    }, {});
-
-    return Object.entries(grouped).map(([slotId, items]) => (
-      <Card
-        key={slotId}
-        title={`${getSlotLabel(Number(slotId))} Required Inventory`}
-        style={{ width: 300, margin: 10, backgroundColor: "#e6f7ff" }}
-      >
-        <CustomButton
-          buttonName="VIEW SLOTS"
-          variant="text"
-          onClick={naviagteslotmap}
-        />
-        {items.map((item, index) => (
-          <Row justify="space-between" key={index} style={{ marginBottom: 8 }}>
-            <Typography.Text>
-              {getGivenTypeLabel(item.given_type)}:
-            </Typography.Text>
-            <Typography.Text strong style={{ color: "#fa8c16" }}>
-              {item.total_quantity}
-            </Typography.Text>
-          </Row>
-        ))}
-      </Card>
-    ));
-  };
-
   // DAILY INVENTORY TABLE
   return (
     <>
@@ -525,16 +453,9 @@ function AdminDashboard() {
             )}
           </div>
 
-          <div style={{ marginTop: 40 }}>
-            <Card style={{ backgroundColor: "#f6ffed", textAlign: "center" }}>
-              <Typography.Title level={4}>
-                Daily Milk Requirement
-              </Typography.Title>
-            </Card>
-            <Row justify="center" style={{ marginTop: 20 }} wrap>
-              {requiredInventory.length > 0 && renderAllSlotInventories()}
-            </Row>
-          </div>
+        <Box  sx={{marginTop:"30px"}}>
+           <MilkRequiredReport/>
+        </Box>
 
           <div style={{ marginTop: 40 }}>
             <Card

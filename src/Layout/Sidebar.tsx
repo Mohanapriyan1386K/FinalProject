@@ -12,9 +12,10 @@ import {
   Typography,
   Divider,
 } from "@mui/material";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import LogoutIcon from "@mui/icons-material/Logout";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import { useState } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 
@@ -22,18 +23,19 @@ const drawerWidth = 240;
 const menuItems = [
   {
     text: "User Management",
-    to: "/admindashboard",
-    icon: <DashboardIcon />,
+    to: "/dashboard",
+    icon: <GroupAddIcon/>,
+    
   },
   {
     text: "Inventory Management",
-    to: "/admindashboard/inventory",
-    icon: <PeopleAltIcon />,
+    to: "/dashboard/inventory",
+    icon: <DashboardCustomizeIcon />,
   },
   {
     text: "Distributed",
-    to: "/admindashboard/distributedList",
-    icon: <DashboardIcon />,
+    to: "/dashboard/distributedList",
+    icon: <AddBusinessIcon />,
   },
 ];
 

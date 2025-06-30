@@ -4,19 +4,17 @@ import { Box, Paper } from "@mui/material";
 import {
   Typography,
   Tooltip,
-  Modal,
   Pagination,
   Table,
   Spin,
   Select,
 } from "antd";
-import CustomButton from "../../Compontents/CoustomButton";
+import CustomButton from "../../../Compontents/CoustomButton";
 import {
   fetchUserList,
   viewUser,
-} from "../../Services/ApiService";
-import { useEffect, useState } from "react";
-import { getDecryptedCookie } from "../../Uitils/Cookeis";
+} from "../../../Services/ApiService";
+import {useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EditOutlined,
@@ -25,8 +23,9 @@ import {
   StopTwoTone,
   EyeOutlined,
 } from "@ant-design/icons";
-import ViewUserModal from "../../Screens/Modal/ViewUserModak";
-import { handleUserDeleteOrToggle } from "../Modal/handleUserDeleteOrToggle"
+import ViewUserModal from "../../../Screens/Modal/ViewUserModak";
+import { handleUserDeleteOrToggle } from "../../Modal/handleUserDeleteOrToggle"
+import {useUserdata} from "../../../Hooks/UserHook"
 const { Option } = Select;
 
 interface SlotData {
@@ -82,10 +81,8 @@ interface User {
 }
 
 function UserMangement() {
+  const token=useUserdata()
   const navigate = useNavigate();
-  const userdata = getDecryptedCookie("user_token");
-  const token = userdata.token;
-
   const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(10);
@@ -119,9 +116,6 @@ function UserMangement() {
     fetchData();
   }, [currentPage]);
 
-  const onEdit = (record: User) => {
-    navigate(`/admin-dashboard/edit/${record.id}`);
-  };
 
   const onDelete = (record: User) => {
     handleUserDeleteOrToggle(record, token, -1, fetchData);
@@ -179,7 +173,7 @@ function UserMangement() {
             {record.status === 1 && (
               <EditOutlined
                 style={{ color: "#1b5e20", cursor: "pointer", fontSize: "18px" }}
-                onClick={() => onEdit(record)}
+                onClick={() =>navigate("editUser",{state:{id:record.id}})}
               />
             )}
           </Tooltip>
@@ -231,7 +225,7 @@ function UserMangement() {
           <CustomButton
             buttonName="ADD USER"
             sx={{ backgroundColor: "#1b5e20" }}
-            onClick={() => navigate("/admin-dashboard/add")}
+            onClick={() => navigate("/dashboard/createuser")}
           />
         </Box>
       </Paper>

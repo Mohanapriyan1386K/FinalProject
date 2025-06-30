@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Table, Typography, Tag, message, Button } from "antd";
 import { toast } from "react-toastify";
-import { distributorList } from "../../Services/ApiService";
+import { distributorList } from "../../../Services/ApiService";
 import { useNavigate } from "react-router-dom";
-import CustomButton from "../../Compontents/CoustomButton"
-
-import{getDecryptedCookie}from "../../Uitils/Cookeis"
+import CustomButton from "../../../Compontents/CoustomButton"
+import { useUserdata } from "../../../Hooks/UserHook";
 import { Box } from "@mui/material";
 
 const { Text } = Typography;
@@ -25,10 +24,7 @@ interface DistributorRecord {
 }
 
 const Distributor = () => {
-  const userdata= getDecryptedCookie("user_token")
-  const token=userdata.token
-
-
+  const token=useUserdata()
   const navigate = useNavigate();
   const [distributors, setDistributors] = useState<DistributorRecord[]>([]);
   const [loading, setLoading] = useState(false);

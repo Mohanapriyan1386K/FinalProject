@@ -10,7 +10,7 @@ export const AuthPrivate = () => {
   if (!token) return <Outlet />;
 
   // Redirect based on role
-  if (type === "1") return <Navigate to="/admindashboard" replace />;
+  if (type === "1") return <Navigate to="/dashboard" replace />;
   if (type === "2") return <Navigate to="/vendordashboard" replace />;
   if (type === "3") return <Navigate to="/userdashboard" replace />;
 
