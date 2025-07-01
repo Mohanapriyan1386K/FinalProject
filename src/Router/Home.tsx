@@ -6,9 +6,10 @@ import Inventory from "../Screens/Home/Inventory/Innventory";
 
 import Inventorylistview from "../Screens/Home/Inventory/Inventorylistview";
 import Slotmapping from "../Screens/Home/Inventory/Slotmapping";
-import Distributer from "../Screens/Home/Inventory/Distributer";
-import Route from "../Screens/Home/Inventory/Route";
+import Distributer from "../Screens/Home/Distributed/Distributer";
+import Route from "../Screens/Home/Distributed/Route";
 import CreateUser from "../Screens/Home/Users/UersForm";
+import AssignDistributor from "../Screens/Home/Distributed/AssignDistributor";
 
 export const AdminRouter: RouteObject[] = [
   {
@@ -22,6 +23,7 @@ export const AdminRouter: RouteObject[] = [
       { path: "inventory/slotmapping", element: <Slotmapping /> },
       { path: "distributedList", element: <Distributer /> },
       { path: "distributedList/Route", element: <Route /> },
+      { path: "distributedList/Slotassign", element: <AssignDistributor/> },
     ],
   },
 ];

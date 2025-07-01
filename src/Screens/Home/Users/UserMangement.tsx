@@ -1,20 +1,6 @@
-// src/screens/Admin/UserMangement.tsx
-
 import { Box, Paper } from "@mui/material";
-import {
-  Typography,
-  Tooltip,
-  Pagination,
-  Table,
-  Spin,
-  Select,
-} from "antd";
-import CustomButton from "../../../Compontents/CoustomButton";
-import {
-  fetchUserList,
-  viewUser,
-} from "../../../Services/ApiService";
-import {useEffect, useState } from "react";
+import { Typography, Tooltip } from "antd";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EditOutlined,
@@ -23,10 +9,15 @@ import {
   StopTwoTone,
   EyeOutlined,
 } from "@ant-design/icons";
+import CustomButton from "../../../Compontents/CoustomButton";
+import { fetchUserList, viewUser } from "../../../Services/ApiService";
 import ViewUserModal from "../../../Screens/Modal/ViewUserModak";
-import { handleUserDeleteOrToggle } from "../../Modal/handleUserDeleteOrToggle"
-import {useUserdata} from "../../../Hooks/UserHook"
-const { Option } = Select;
+import { handleUserDeleteOrToggle } from "../../Modal/handleUserDeleteOrToggle";
+import { useUserdata } from "../../../Hooks/UserHook";
+import Loader from "../../../Compontents/Loader";
+import CustomTable from "../../../Compontents/CustomTable";
+import CustomDropDown from "../../../Compontents/CustomDropDown";
+import { useFormik } from "formik";
 
 interface SlotData {
   id: number;
@@ -80,42 +71,66 @@ interface User {
   status: number;
 }
 
+interface FilterValues {
+  pay_type?: string;
+  customer_type?: string;
+  user_type?: string;
+  line_id?: string;
+  price_tag_id?: string;
+  status?: string;
+}
+
 function UserMangement() {
-  const token=useUserdata()
+  const token = useUserdata();
   const navigate = useNavigate();
+
   const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(10);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<UserFullView | null>(null);
   const [viewUserModel, setviewUserModel] = useState(false);
+  const [submittedFilters, setSubmittedFilters] = useState<FilterValues>({});
 
-  const [usertype, setusertype] = useState<string | undefined>(undefined);
-  const [paytype, setpaytype] = useState<string | undefined>(undefined);
-  const [status, setstaus] = useState<string | undefined>(undefined);
+  const formik = useFormik<FilterValues>({
+    initialValues: {
+      pay_type: "",
+      customer_type: "",
+      user_type: "",
+      line_id: "",
+      price_tag_id: "",
+      status: "",
+    },
+    onSubmit: (values) => {
+      setSubmittedFilters(values);
+      setCurrentPage(1);
+    },
+  });
 
   const fetchData = () => {
     setLoading(true);
     const payload = new FormData();
     payload.append("token", token);
-    if (usertype) payload.append("user_type", usertype);
-    if (paytype) payload.append("pay_type", paytype);
-    if (status) payload.append("status", status);
+
+    Object.entries(submittedFilters).forEach(([key, value]) => {
+      if (value) payload.append(key, value);
+    });
 
     fetchUserList(currentPage, 10, payload)
       .then((res) => {
         const data = res.data?.data || [];
         setUsers(data);
-        setTotal(res.data?.total || 50);
+        setTotal(res.data?.total || 0);
       })
       .catch((err) => console.error("Failed to fetch users:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
-
+  }, [currentPage, submittedFilters]);
 
   const onDelete = (record: User) => {
     handleUserDeleteOrToggle(record, token, -1, fetchData);
@@ -130,6 +145,7 @@ function UserMangement() {
     const Payload = new FormData();
     Payload.append("token", token);
     Payload.append("user_id", record.id);
+
     viewUser(Payload).then((res) => {
       setUserData(res.data.data);
       setviewUserModel(true);
@@ -146,7 +162,11 @@ function UserMangement() {
       render: (email: string) => email?.trim() || "--",
     },
     { title: "Phone", dataIndex: "phone", key: "phone" },
-    { title: "Customer Type", dataIndex: "customer_type", key: "customer_type" },
+    {
+      title: "Customer Type",
+      dataIndex: "customer_type",
+      key: "customer_type",
+    },
     {
       title: "Pay Type",
       dataIndex: "pay_type",
@@ -168,12 +188,18 @@ function UserMangement() {
       title: "Actions",
       key: "actions",
       render: (_: any, record: User) => (
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={{ display: "flex",gap:1, justifyContent:"space-around" }}>
           <Tooltip title="Edit">
             {record.status === 1 && (
               <EditOutlined
-                style={{ color: "#1b5e20", cursor: "pointer", fontSize: "18px" }}
-                onClick={() =>navigate("editUser",{state:{id:record.id}})}
+                style={{
+                  color: "#1b5e20",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                }}
+                onClick={() =>
+                  navigate("editUser", { state: { id: record.id } })
+                }
               />
             )}
           </Tooltip>
@@ -220,7 +246,13 @@ function UserMangement() {
           color: "#2e7d32",
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Typography style={{ fontSize: "25px" }}>User Management</Typography>
           <CustomButton
             buttonName="ADD USER"
@@ -229,81 +261,59 @@ function UserMangement() {
           />
         </Box>
       </Paper>
+      <Paper sx={{backgroundColor:"#E8F5E9",padding:2}}>
+      <form onSubmit={formik.handleSubmit}>
+        <CustomDropDown
+          dropdownKeys={[
+            "user_type",
+            "customer_type",
+            "pay_type",
+            "line_id",
+            "price_tag_id",
+            "status",
+          ]}
+          formik={formik}
+        />
 
-      <form>
-        <Box sx={{ display: "flex", gap: 2, marginTop: 2 }}>
-          <Select
-            placeholder="Select User Type"
-            style={{ width: 200 }}
-            onChange={(value) => {
-              setusertype(value);
-            }}
-            allowClear
-            value={usertype}
-          >
-            <Option value="2">Admin</Option>
-            <Option value="3">Vendor</Option>
-            <Option value="4">Distributor</Option>
-            <Option value="5">Customer</Option>
-          </Select>
-
-          <Select
-            placeholder="Pay Type"
-            style={{ width: 200 }}
-            onChange={(value) => {
-              setpaytype(value);
-              setCurrentPage(1);
-            }}
-            allowClear
-            value={paytype}
-          >
-            <Option value="1">Monthly</Option>
-            <Option value="2">Daily</Option>
-          </Select>
-
-          <Select
-            placeholder="Status"
-            style={{ width: 200 }}
-            onChange={(value) => {
-              setstaus(value);
-              setCurrentPage(1);
-            }}
-            allowClear
-            value={status}
-          >
-            <Option value="1">Active</Option>
-            <Option value="0">Inactive</Option>
-          </Select>
-
+        <div className="d-flex gap-2 my-2">
           <CustomButton
-            buttonName="Filter"
-            sx={{ backgroundColor: "#1b5e20" }}
-            onClick={fetchData}
-          />
-        </Box>
-      </form>
+            variant="outlined"
+            buttonName="FILTER"
+            type="submit"
+            sx={{backgroundColor:"green",color:"white"}}
 
-      <Paper>
+          />
+          <CustomButton
+            variant="outlined"
+            buttonName="RESET"
+            type="button"
+            sx={{backgroundColor:"red",color:"white"}}
+            onClick={() => {
+              formik.resetForm();
+              setSubmittedFilters({});
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+      </form>
+        </Paper>
+
+      <Paper sx={{backgroundColor:"#E8F5E9"}} >
         <Box style={{ padding: 20 }}>
           <Typography.Title level={3}>User List</Typography.Title>
           {loading ? (
-            <Spin />
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <Loader />
+            </div>
           ) : (
-            <>
-              <Table
-                dataSource={users}
-                columns={columns}
-                rowKey={(record, index) => record.email || `user-${index}`}
-                pagination={false}
-              />
-              <Pagination
-                current={currentPage}
-                pageSize={10}
-                total={total}
-                onChange={(page) => setCurrentPage(page)}
-                style={{ marginTop: 5, textAlign: "right" }}
-              />
-            </>
+            <CustomTable
+              dataSource={users}
+              columns={columns}
+              currentPage={currentPage}
+              total={total}
+              onPageChange={setCurrentPage}
+              loading={loading}
+            />
           )}
         </Box>
       </Paper>

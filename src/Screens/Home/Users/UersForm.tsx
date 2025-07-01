@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Select } from "antd";
-import { toast } from "react-toastify";
+import { Button, Select } from "antd";
+import { toast,ToastContainer } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -12,10 +12,11 @@ import {
   handleCreateUser,
   handleEditUser,
 } from "../../../Services/ApiService";
-import FormField from "../../../Compontents/CoustomInputFiled";
 import { useNavigate } from "react-router-dom";
 import {useUserdata} from "../../../Hooks/UserHook"
-
+import CustomInputField from "../../../Compontents/CoustomInputFiled";
+import { Box, Paper } from "@mui/material";
+import CustomButton from "../../../Compontents/CoustomButton";
 const { Option } = Select;
 
 interface Line {
@@ -296,7 +297,7 @@ const CreateUser = () => {
       <h5>{label}</h5>
       <div className="row">
         <div className="col-md-4 mb-3">
-          <FormField
+          <CustomInputField
             label="Quantity"
             placeholder="quantity"
             name={`slot_data[${index}].quantity`}
@@ -331,7 +332,7 @@ const CreateUser = () => {
         </div>
         {index === 0 && (
           <div className="col-md-4 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="start date"
               label="Start Date"
               name={`slot_data[${index}].start_date`}
@@ -354,16 +355,19 @@ const CreateUser = () => {
 
   return (
     <div className="container mt-4">
-      {error && <div className="alert alert-danger">{error}</div>}
-
-      <div className="d-flex justify-content-between mb-3">
-        <h2>Add User</h2>
-      </div>
-
+      {error && <div className="alert alert-danger">{error}</div>}      
+        <Paper sx={{backgroundColor:"#E8F5E9", padding:2,fontSize:"25px",fontWeight:"700"}}>
+          <Box sx={{display:"flex",justifyContent:"space-between"}}>
+             {isEdit?"EDIT USER":"ADD USER"}
+             <CustomButton buttonName="Back" sx={{backgroundColor:"green"}} onClick={()=>{navigate}} />
+          </Box>
+        </Paper>
+      
+      <Paper sx={{backgroundColor:"#E8F5E9", padding:2,marginTop:2}}>
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="name"
               label="Name"
               name="name"
@@ -375,7 +379,7 @@ const CreateUser = () => {
             />
           </div>
           <div className="col-md-6 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="username"
               label="Username"
               name="user_name"
@@ -390,7 +394,7 @@ const CreateUser = () => {
 
         <div className="row">
           <div className="col-md-6 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="email"
               label="Email"
               name="email"
@@ -402,7 +406,7 @@ const CreateUser = () => {
             />
           </div>
           <div className="col-md-6 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="phone"
               label="Phone"
               name="phone"
@@ -417,7 +421,7 @@ const CreateUser = () => {
 
         <div className="row">
           <div className="col-md-6 mb-3">
-            <FormField
+            <CustomInputField
               placeholder="alternative number"
               label="Alternative Number"
               name="alternative_number"
@@ -430,7 +434,7 @@ const CreateUser = () => {
           </div>
           {!isEdit && (
             <div className="col-md-6 mb-3">
-              <FormField
+              <CustomInputField
                 placeholder="password"
                 label="Password"
                 name="password"
@@ -546,11 +550,13 @@ const CreateUser = () => {
         )}
 
         <div className="text-end mt-3">
-          <button className="btn btn-primary" type="submit">
+          <button className="btn btn-primary" type="submit" style={{backgroundColor:"green"}} >
             {id ? "Update" : "Create"} User
           </button>
         </div>
       </form>
+       </Paper>
+       <ToastContainer/>
     </div>
   );
 };

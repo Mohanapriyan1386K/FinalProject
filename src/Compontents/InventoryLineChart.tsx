@@ -55,7 +55,7 @@ const InventoryLineChart: React.FC<Props> = ({ mrngData, eveningData }) => {
   };
 
   return (
-    <Card title="Daily Inventory Trend" style={{ marginTop: 24 }}>
+    <Card title="Daily Inventory Trend" style={{ marginTop: 24,backgroundColor:"#E8F5E9" }}>
       <ReactApexChart options={options} series={series} type="line" height={350} />
     </Card>
   );

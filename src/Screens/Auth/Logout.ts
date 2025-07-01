@@ -1,17 +1,10 @@
 import Cookies from "js-cookie";
 import {toast} from "react-toastify"
 import {Logout as Logoutapi} from "../../Services/ApiService"
-import {getDecryptedCookie} from "../../Uitils/Cookeis"
-
-
-
-
+import {useUserdata} from "../../Hooks/UserHook"
 
 export const Logout = (): void => {
-  
-  const usertoken=getDecryptedCookie("user_token")
-  const token=usertoken.token
-
+  const token=useUserdata()
   const payload=new FormData()
   payload.append("token",token)
   

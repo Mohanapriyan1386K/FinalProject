@@ -111,7 +111,7 @@ const Sidebar = () => {
               mb: 1,
               cursor: "pointer",
               "&:hover": {
-                backgroundColor: "#ffcdd2",
+                backgroundColor: "#c8e6c9",
               },
             }}
           >

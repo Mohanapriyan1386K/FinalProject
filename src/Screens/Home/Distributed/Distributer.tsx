@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Table, Typography, Tag, message, Button } from "antd";
+import { Table, Typography, Tag, message, Button, Skeleton } from "antd";
 import { toast } from "react-toastify";
 import { distributorList } from "../../../Services/ApiService";
 import { useNavigate } from "react-router-dom";
-import CustomButton from "../../../Compontents/CoustomButton"
+import CustomButton from "../../../Compontents/CoustomButton";
 import { useUserdata } from "../../../Hooks/UserHook";
 import { Box } from "@mui/material";
+import Loader from "../../../Compontents/Loader";
 
 const { Text } = Typography;
 
@@ -24,7 +25,7 @@ interface DistributorRecord {
 }
 
 const Distributor = () => {
-  const token=useUserdata()
+  const token = useUserdata();
   const navigate = useNavigate();
   const [distributors, setDistributors] = useState<DistributorRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,21 +55,6 @@ const Distributor = () => {
       .finally(() => setLoading(false));
   };
 
-  const handleRouteDetailPage = (
-    route: Route,
-    distributorId: number,
-    distributorName: string
-  ) => {
-    navigate(`Route`, {
-      state: {
-        distributorId,
-        distributorName: distributorName,
-        line_id: route.id,
-        lineName: route.line_name,
-      },
-    });
-  };
-
   useEffect(() => {
     handleGetDistributorList();
   }, []);
@@ -89,12 +75,12 @@ const Distributor = () => {
   ];
 
   const routeColumns = [
-    {
-      title: "Route ID",
-      dataIndex: "id",
-      key: "id",
-      width: 100,
-    },
+    // {
+    //   title: "Route ID",
+    //   dataIndex: "id",
+    //   key: "id",
+    //   width: 100,
+    // },
     {
       title: "Route Name",
       dataIndex: "line_name",
@@ -106,11 +92,7 @@ const Distributor = () => {
       key: "status",
       width: 120,
       render: (status: number) =>
-        status === 1 ? (
-          <Tag color="green">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
+        status === 1 ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
     },
     {
       title: "Action",
@@ -133,18 +115,44 @@ const Distributor = () => {
     },
   ];
 
+  const handleRouteDetailPage = (
+    route: Route,
+    distributorId: number,
+    distributorName: string
+  ) => {
+    navigate(`Route`, {
+      state: {
+        distributorId,
+        distributorName,
+        line_id: route.id,
+        lineName: route.line_name,
+      },
+    });
+  };
+
   return (
-    <Box>
-      <Box sx={{display:"flex",justifyContent:"space-between", marginBottom:"30px" ,backgroundColor:"#F6FFED", padding:2 }}>
-        <h2>Distributor List</h2>
-        <CustomButton
-          buttonName="Slot Assign"
-          sx={{backgroundColor:"#1B5E20", }}
-          onClick={() => navigate("/")}
-        />
-      </Box>
+  <Box>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: "30px",
+        backgroundColor: "#F6FFED",
+        padding: 2,
+      }}
+    >
+      <h2>Distributor List</h2>
+      <CustomButton
+        buttonName="Slot Assign"
+        sx={{ backgroundColor: "#1B5E20" }}
+        onClick={() => navigate("Slotassign")}
+      />
+    </Box>
+
+    {loading ? (
+      <Loader />
+    ) : (
       <Table
-        loading={loading}
         dataSource={distributors}
         columns={distributorColumns}
         rowKey="distributer_id"
@@ -170,8 +178,10 @@ const Distributor = () => {
         }}
         pagination={false}
       />
-    </Box>
-  );
-};
+    )}
+  </Box>
+);
+}
 
-export default Distributor;
+
+export default Distributor

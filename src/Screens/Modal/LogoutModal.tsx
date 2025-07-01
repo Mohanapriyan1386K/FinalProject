@@ -18,7 +18,7 @@ function LogoutModal({ open,onCancel }: LogoutModalProps) {
       onOk={Logout}
       onCancel={onCancel}
       okText="Yes, Logout"
-      cancelText="Cancel" style={undefined}    >
+      cancelText="Cancel" style={{}}    >
       <p>Are you sure you want to logout?</p>
     </Modal>
   );

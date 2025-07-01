@@ -5,38 +5,31 @@ import {
   UpdateInventory,
   AddInventory,
   list_inventory_log,
+  distributedloginventoy,
 } from "../../../Services/ApiService";
-import {
-  Card,
-  Typography,
-  Row,
-  Col,
-  Spin,
-  Table,
-  Button,
-  Modal,
-  InputNumber,
-  Input,
-  Form as AntForm,
-  Form,
-} from "antd";
+import Loader from "../../../Compontents/Loader";
+import { Card, Typography, Row, Col, Button } from "antd";
 import {
   ClockCircleOutlined,
   FieldTimeOutlined,
   AppstoreAddOutlined,
-  LoadingOutlined,
   PlusOutlined,
   EditOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import InventoryLineChart from "../../../Compontents/InventoryLineChart";
+import AddIcon from "@mui/icons-material/Add";
+import InventoryLineChart from "../../Charts/InventoryLineChart";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import MilkRequiredReport from "./MilkRequiredReport";
 import { Box } from "@mui/material";
-import {useUserdata} from "../../../Hooks/UserHook"
+import { useUserdata } from "../../../Hooks/UserHook";
+import UpdateInventoryModal from "../../Modal/UpdateinventroyModel";
+import Distrbutedeinventorymodal from "../../Modal/DistributedLoginventory";
+import AddInventoryModal from "../../Modal/AddInventoryModal";
+import CustomTable from "../../../Compontents/CustomTable";
 
 interface SlotData {
   date: string;
@@ -50,7 +43,6 @@ interface DailyInventory {
   mrng_data: SlotData[];
   evening_data: SlotData[];
 }
-
 
 interface InventoryItem {
   id: any;
@@ -72,56 +64,53 @@ interface InventoryTransaction {
   id: number;
   inventory_id: number;
   quantity: number;
-  created_at: string; // formatted as "DD-MM-YYYY HH:mm:ss"
+  created_at: string;
   updated_at: string | null;
   status: number;
   status_text: string;
-  type: string; // e.g., "Out"
+  type: string;
   type_id: number;
   customer_name: string | null;
   given_by_name: string;
   created_by: number;
   slot_id: number;
   slot_name: string;
-  pervious_quantity: number; // likely a typo: should be 'previous_quantity'
+  pervious_quantity: number;
   remaining_quantity: number;
   comment: string;
+}
+
+interface whole {
+  is_update_status: number;
 }
 
 const validationSchema = Yup.object({
   total_quantity: Yup.number().required("Total quantity is required"),
   comment: Yup.string().nullable(),
 });
-``;
-
-const customSpinIcon = (
-  <LoadingOutlined style={{ fontSize: 32, color: "#1890ff" }} spin />
-);
 
 function AdminDashboard() {
-  const navigte = useNavigate();
+  const navigate = useNavigate();
   const [dailyInventory, setDailyInventory] = useState<DailyInventory | null>(
     null
   );
   const [inventoryList, setInventoryList] = useState<InventoryItem[]>([]);
-  const [wholedata, setwholedata] = useState({
-    is_add_status: 0,
-  });
+  const [wholedata, setWholedata] = useState<whole>();
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(10);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModelOpen, setViewModelOpen] = useState(false);
+  const [isAddModalOpeninven, setIsAddModalOpeninven] = useState(false);
   const [islist_inventory_logs, setlist_inventory_logs] = useState<
     InventoryTransaction[]
   >([]);
 
-  const token = useUserdata()
+  const token = useUserdata();
 
-  // update formik
-  const formik = useFormik({
+  // Update formik
+  const updateFormik = useFormik({
     initialValues: {
       id: 0,
       total_quantity: 0,
@@ -139,7 +128,7 @@ function AdminDashboard() {
         .then((res) => {
           toast.success(res.data.msg);
           setIsEditModalOpen(false);
-          fetchInventoryList(); // reload table
+          fetchInventoryList();
         })
         .catch((error) => {
           toast.error("Failed to update inventory.");
@@ -148,14 +137,14 @@ function AdminDashboard() {
     },
   });
 
-  // add formik
+  // Add formik
   const addFormik = useFormik({
     initialValues: {
       total_quantity: 0,
       comment: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: (values) => {
       const payload = new FormData();
       payload.append("token", token);
       payload.append("total_quantity", values.total_quantity.toString());
@@ -169,18 +158,46 @@ function AdminDashboard() {
         })
         .catch((error) => {
           toast.error("Failed to add inventory.");
-          console.error(error.msg);
+          console.error(error);
         });
     },
   });
 
-  // api call
+  const distributeFormik = useFormik({
+    initialValues: {
+      total_quantity: 0,
+      milk_give_type: "",
+      distributor_id: "",
+    },
+    validationSchema, // Ensure this includes all fields
+    onSubmit: async (values) => {
+      const payload = new FormData();
+      payload.append("token", token);
+      payload.append("given_qty", values.total_quantity.toString());
+      payload.append("type", values.milk_give_type);
+      payload.append("distributer_id", values.distributor_id);
+
+      distributedloginventoy(payload)
+        .then((res) => {
+          toast.success("Distributed inventory successfully.");
+          setIsAddModalOpeninven(false);
+          fetchInventoryList();
+        })
+        .catch((error) => {
+          toast.error("Failed to distribute inventory.");
+          console.error(error);
+        });
+    },
+  });
+
   const fetchInventoryList = () => {
     setTableLoading(true);
-    Listinventory(page, 10, token)
+    const payload = new FormData();
+    payload.append("token", token);
+    Listinventory(page, 10, payload)
       .then((res) => {
         setInventoryList(res.data.data);
-        setwholedata(res.data);
+        setWholedata(res.data);
         setTotal(res.data?.total || 0);
       })
       .catch((error) => {
@@ -194,10 +211,8 @@ function AdminDashboard() {
   const getallinventorydata = () => {
     const payload = new FormData();
     payload.append("token", token);
-    Promise.all([
-      getdailinventroy(payload),
-    ]).then(([inventoryRes]) => {
-      const invData = inventoryRes?.data?.data;
+    getdailinventroy(payload).then((res) => {
+      const invData = res?.data?.data;
       if (Array.isArray(invData) && invData.length > 0) {
         setDailyInventory(invData[0]);
       }
@@ -206,7 +221,7 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-     getallinventorydata()  
+    getallinventorydata();
   }, [token]);
 
   useEffect(() => {
@@ -214,13 +229,7 @@ function AdminDashboard() {
     fetchInventoryList();
   }, [page, token]);
 
-
-
-
-
-
-
-  const handeleview = (record: InventoryItem) => {
+  const handleView = (record: InventoryItem) => {
     const payload = new FormData();
     payload.append("token", token);
     payload.append("inventory_id", record.id);
@@ -228,7 +237,7 @@ function AdminDashboard() {
     list_inventory_log(payload, 1, 10).then((res) => {
       const logs = res.data.data;
       setlist_inventory_logs(logs);
-      navigte("inventorylistview", {
+      navigate("inventorylistview", {
         state: {
           userid: record.id,
           logs: logs,
@@ -238,7 +247,7 @@ function AdminDashboard() {
   };
 
   const handleEdit = (record: InventoryItem) => {
-    formik.setValues({
+    updateFormik.setValues({
       id: record.id,
       total_quantity: record.total_quantity,
       comment: record.comment || "",
@@ -246,59 +255,14 @@ function AdminDashboard() {
     setIsEditModalOpen(true);
   };
 
-  // api call end
-
-  // List inventory
-  const columns1 = [
-    {
-      title: "Slot",
-      dataIndex: "slot_name",
-      key: "slot_name",
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-    },
-    {
-      title: "Quantity",
-      dataIndex: "quantity",
-      key: "quantity",
-    },
-    {
-      title: "Previous Quantity",
-      dataIndex: "pervious_quantity",
-      key: "pervious_quantity",
-    },
-    {
-      title: "Remaining Quantity",
-      dataIndex: "remaining_quantity",
-      key: "remaining_quantity",
-    },
-    {
-      title: "Status",
-      dataIndex: "status_text",
-      key: "status_text",
-      render: (text: any, record: { status: number }) => (
-        <span style={{ color: record.status === 1 ? "green" : "red" }}>
-          {text}
-        </span>
-      ),
-    },
-    {
-      title: "Given By",
-      dataIndex: "given_by_name",
-      key: "given_by_name",
-    },
-    {
-      title: "Comment",
-      dataIndex: "comment",
-      key: "comment",
-      render: (text: any) => text || "—",
-    },
-  ];
-
-  // Log inventory
+  const handleAdd = (record: InventoryItem) => {
+    distributeFormik.setValues({
+      id: record.id,
+      total_quantity: record.total_quantity,
+      comment: record.comment || "",
+    });
+    setIsAddModalOpeninven(true);
+  };
 
   const columns = [
     {
@@ -337,11 +301,6 @@ function AdminDashboard() {
       key: "comment",
       render: (text: string | null) => text || "—",
     },
-    // {
-    //   title:"Addstatus",
-    //   dataIndex:"is_add_status",
-    //   key:"is_add_status",
-    // },
     {
       title: "Actions",
       key: "actions",
@@ -350,21 +309,27 @@ function AdminDashboard() {
           <Button
             type="link"
             icon={<EyeOutlined />}
-            onClick={() => handeleview(record)}
-          ></Button>
-          {!(wholedata.is_add_status === 0 && record.status === 2) && (
-            <Button
-              type="link"
-              icon={<EditOutlined style={{ color: "#CD5C5C" }} />}
-              onClick={() => handleEdit(record)}
-            />
+            onClick={() => handleView(record)}
+          />
+          {!(wholedata?.is_update_status === 0 && record.status === 2) && (
+            <>
+              <Button
+                type="link"
+                icon={<EditOutlined style={{ color: "#CD5C5C" }} />}
+                onClick={() => handleEdit(record)}
+              />
+              <Button
+                type="link"
+                icon={<AddIcon style={{ color: "#2E7D32" }} />}
+                onClick={() => handleAdd(record)}
+              />
+            </>
           )}
         </>
       ),
     },
   ];
 
-  // DAILY INVENTORY TABLE
   return (
     <>
       <Card style={{ backgroundColor: "#f6ffed" }}>
@@ -375,7 +340,7 @@ function AdminDashboard() {
 
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 40 }}>
-          <Spin size="large" indicator={customSpinIcon} />
+          <Loader />
         </div>
       ) : (
         <>
@@ -453,9 +418,9 @@ function AdminDashboard() {
             )}
           </div>
 
-        <Box  sx={{marginTop:"30px"}}>
-           <MilkRequiredReport/>
-        </Box>
+          <Box sx={{ marginTop: "30px" }}>
+            <MilkRequiredReport />
+          </Box>
 
           <div style={{ marginTop: 40 }}>
             <Card
@@ -470,133 +435,35 @@ function AdminDashboard() {
                 </Button>
               }
             >
-              <Spin spinning={tableLoading} indicator={customSpinIcon}>
-                <Table
-                  columns={columns}
-                  dataSource={inventoryList.map((item) => ({
-                    ...item,
-                    key: item.id,
-                  }))}
-                  pagination={{
-                    current: page,
-                    pageSize: 10,
-                    total: total,
-                    onChange: (newPage) => setPage(newPage),
-                  }}
-                />
-              </Spin>
+              <CustomTable
+                dataSource={inventoryList}
+                columns={columns}
+                currentPage={page}
+                total={total}
+                onPageChange={(newPage) => setPage(newPage)}
+                loading={tableLoading}
+              />
             </Card>
           </div>
 
-          {/* ADD INVENTORY MODEL */}
-          <Modal
-            title="Add Inventory"
-            open={isAddModalOpen}
-            onOk={() => addFormik.handleSubmit()}
-            onCancel={() => setIsAddModalOpen(false)}
-            okText="Add"
-          >
-            <Form layout="vertical">
-              <Form.Item
-                label="Total Quantity"
-                validateStatus={addFormik.errors.total_quantity ? "error" : ""}
-                help={addFormik.errors.total_quantity}
-              >
-                <InputNumber
-                  name="total_quantity"
-                  value={addFormik.values.total_quantity}
-                  onChange={(value) =>
-                    addFormik.setFieldValue("total_quantity", value)
-                  }
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
+          {/* Modals */}
+          <AddInventoryModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            formik={addFormik}
+          />
 
-              <Form.Item
-                label="Comment"
-                validateStatus={addFormik.errors.comment ? "error" : ""}
-                help={addFormik.errors.comment}
-              >
-                <Input.TextArea
-                  name="comment"
-                  value={addFormik.values.comment}
-                  onChange={addFormik.handleChange}
-                />
-              </Form.Item>
-            </Form>
-          </Modal>
-          {/* ADD INVENTORY MODEL */}
+          <UpdateInventoryModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            formik={updateFormik}
+          />
 
-          {/* UPDATED INVENTOY MODEL */}
-          <Modal
-            title="Update Inventory"
-            open={isEditModalOpen}
-            onOk={() => formik.handleSubmit()}
-            onCancel={() => setIsEditModalOpen(false)}
-            okText="Update"
-          >
-            <AntForm layout="vertical">
-              <AntForm.Item
-                label="Total Quantity"
-                validateStatus={formik.errors.total_quantity ? "error" : ""}
-                help={formik.errors.total_quantity}
-              >
-                <InputNumber
-                  name="total_quantity"
-                  value={formik.values.total_quantity}
-                  onChange={(value) =>
-                    formik.setFieldValue("total_quantity", value)
-                  }
-                  style={{ width: "100%" }}
-                />
-              </AntForm.Item>
-
-              <AntForm.Item label="Comment">
-                <Input.TextArea
-                  name="comment"
-                  value={formik.values.comment}
-                  onChange={formik.handleChange}
-                />
-              </AntForm.Item>
-            </AntForm>
-          </Modal>
-          {/* UPDATED INVENTOY MODEL */}
-          {/* VIEW IN VNTOY LOG MODEL */}
-          <Modal
-            title={null}
-            open={isViewModelOpen}
-            onCancel={() => setViewModelOpen(false)}
-            footer={null}
-            width="calc(100vw - 250px)"
-            style={{
-              top: 20,
-              marginLeft: "250px",
-              padding: 0,
-            }}
-            bodyStyle={{
-              height: "90vh",
-              padding: "5px",
-              overflowY: "auto",
-              background: "#f9f9f9",
-            }}
-            closable={false}
-          >
-            <Spin spinning={false}>
-              <Table
-                columns={columns1}
-                dataSource={islist_inventory_logs.map((item) => ({
-                  ...item,
-                  key: item.id,
-                }))}
-                pagination={{ pageSize: 20 }}
-                scroll={{ x: "1000px" }}
-                bordered
-                size="middle"
-                style={{ backgroundColor: "#fff" }}
-              />
-            </Spin>
-          </Modal>
-          {/* VIEW IN VNTOY LOG MODEL */}
+          <Distrbutedeinventorymodal
+            isOpen={isAddModalOpeninven}
+            onClose={() => setIsAddModalOpeninven(false)}
+            formik={distributeFormik}
+          />
         </>
       )}
 

@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { getRouteDetails } from "../../../Services/ApiService";
 import { toast } from "react-toastify";
 import { useUserdata } from "../../../Hooks/UserHook";
+import { Paper } from "@mui/material";
 
 const { Title, Text } = Typography;
 
@@ -140,10 +141,12 @@ const Route = () => {
 
   return (
     <div style={{ padding: "1rem" }}>
+      <Paper sx={{padding:2,backgroundColor:"#E8F5E9"}}>
       <Title level={4}>Route Details</Title>
       <Text>Line: {lineName}</Text>
       <br />
       <Text>Distributor: {distributorName}</Text>
+      </Paper>
 
       <Table
         dataSource={routeData}

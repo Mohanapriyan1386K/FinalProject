@@ -121,20 +121,12 @@ export const getDailymilkrequmernt = (payload: any) => {
 // inventory
 
 export const Listinventory = (
-  page: number = 0,
-  size: number = 10,
-  token: any
+  page: number,
+  size: number,
+  payload:any
 ) => {
-  const params = new URLSearchParams();
-  params.append("token", token);
   return axiosInstance.post(
-    `/milk-api/inventorylist-inventory?page=${page}&size=${size}`,
-    params,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
+    `/milk-api/inventorylist-inventory?page=${page}&size=${size}`,payload   
   );
 };
 
@@ -156,10 +148,6 @@ export const ViwslotMap=(payload:any,page:number,size:number)=>{
     return axiosInstance.post(`/milk-api/milk-sales/list-slot-mapping?pages=${page}&${size}`,payload)
 }
 
-// export const ViwslotMapview=(payload:any)=>{
-//     return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
-// }
-
 
 export const distributorList=(payload:any)=>{
     return axiosInstance.post("/milk-api/slot-assign/get-distributer-line",payload)
@@ -180,3 +168,22 @@ export const Logout = (payload: any) => {
   return axiosInstance.post("/milk-api/auth/logout", payload);
 };
 
+// 
+
+
+export const distributerdropdown=(payload:any)=>{
+    return axiosInstance.post("/milk-api/drop-down/distributer-drop-down",payload)
+}
+
+
+export const distributedloginventoy=(payload:any)=>{
+  return axiosInstance.post("/milk-api/milk-sales/distributer-inventory-log",payload)
+}
+
+export const customerdropdown=(payload:any)=>{
+    return axiosInstance.post("/milk-api/drop-down/customer-drop-down",payload)
+}
+
+export const assignslotmap=(paylod:any)=>{
+    return axiosInstance.post("/milk-api/slot-assign/assign-slot-map",paylod)
+}
