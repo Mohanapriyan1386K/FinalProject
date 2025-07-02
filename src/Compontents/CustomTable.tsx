@@ -6,7 +6,7 @@ interface CustomTableProps {
   columns: any[];
   currentPage: number;
   total: number;
-  onPageChange: (page: number) => void;
+  onPageChange: (page: number, pageSize: number) => void;
   pageSize?: number;
   loading?: boolean;
 }
@@ -25,15 +25,17 @@ const CustomTable: React.FC<CustomTableProps> = ({
       columns={columns}
       dataSource={dataSource.map((item) => ({
         ...item,
-        key: item.id || item.key, // fallback to item.key if no id
+        key: item.id || item.key,
       }))}
       loading={loading}
       pagination={{
         current: currentPage,
         pageSize,
         total,
+        showSizeChanger: true,
+        pageSizeOptions: ['10', '20','30','40'],
         onChange: onPageChange,
-        showSizeChanger: false,
+        onShowSizeChange: onPageChange,
       }}
     />
   );

@@ -13,9 +13,9 @@ import {
   Divider,
 } from "@mui/material";
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import { useState } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 
@@ -35,7 +35,7 @@ const menuItems = [
   {
     text: "Distributed",
     to: "/dashboard/distributedList",
-    icon: <AddBusinessIcon />,
+    icon: <LocalShippingIcon />,
   },
 ];
 

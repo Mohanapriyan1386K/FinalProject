@@ -1,7 +1,7 @@
 // AssignDistributor.tsx
 
 import { useEffect, useState } from "react";
-import { Button, DatePicker, Select, Spin } from "antd";
+import {DatePicker, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -10,6 +10,7 @@ import CustomDropDown from "../../../Compontents/CustomDropDown";
 import { assignslotmap, customerdropdown } from "../../../Services/ApiService";
 import { useUserdata } from "../../../Hooks/UserHook";
 import { Paper } from "@mui/material";
+import CustomButton from "../../../Compontents/CoustomButton";
 
 type AssignDistributorFormValues = {
   distributer_id: string;
@@ -236,9 +237,7 @@ const AssignDistributor = () => {
               </>
             )}
 
-          <Button type="primary" htmlType="submit" style={{ marginTop: 20,backgroundColor:"green" }}>
-            Submit
-          </Button>
+          <CustomButton buttonName=" Submit" type="submit" sx={{ marginTop: 20,backgroundColor:"green"}}/>
         </form>
       </Paper>
     </div>

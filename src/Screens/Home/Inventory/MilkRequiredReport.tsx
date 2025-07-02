@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Typography, Card, Spin, Row, Col } from "antd";
+import { Typography, Card,Row, Col } from "antd";
 import { getDailymilkrequmernt } from "../../../Services/ApiService";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../../../Compontents/CoustomButton";
@@ -9,7 +9,6 @@ const { Title } = Typography;
 const MilkRequiredReport = () => {
   const navigate = useNavigate();
   const [requiredMilk, setRequiredMilk] = useState([]);
-  const [loading, setLoading] = useState(false);
   const token=useUserdata()
   useEffect(() => {
     const formData = new FormData();
@@ -18,17 +17,20 @@ const MilkRequiredReport = () => {
   }, []);
 
   // get milk required data
-  const handleGetRequiredMilkReport = async (formData: FormData) => {
-    setLoading(true);
-    const res = await getDailymilkrequmernt(formData);
+  const handleGetRequiredMilkReport = (formData: FormData) => {
+  getDailymilkrequmernt(formData)
+    .then((res) => {
+      if (res.data.status === 1) {
+        setRequiredMilk(res.data.data || []);
+      } else {
+        console.error("API Error:", res.data);
+      }
+    })
+    .catch((error) => {
+      console.error("Network Error:", error);
+    });
+};
 
-    if (res.data.status === 1) {
-      setRequiredMilk(res.data.data || []);
-    } else {
-      console.error("API Error:", res.data);
-    }
-    setLoading(false);
-  };
 
   const mapSlot: Record<number, string> = {
     1: "Morning",
@@ -75,13 +77,12 @@ const MilkRequiredReport = () => {
           marginBottom: 24,
           padding:"30px",
           fontWeight: 600,
-          backgroundColor:"#F6FFED",
+          backgroundColor:"#E8F5E9",
           fontSize:"30px"
         }}
       >
         Daily Milk Requirement
       </Title>
-      <Spin spinning={loading} tip="Loading data...">
         <Row justify="center">
           <Col xs={24}>
             <Card className="summary-card-container">
@@ -93,7 +94,7 @@ const MilkRequiredReport = () => {
                     <CustomButton
                       buttonName="View Slot"
                       onClick={handleViewVendorMorning}
-                      sx={{backgroundColor:"#72C41A"}}
+                      sx={{backgroundColor:"green"}}
 
                     />
                   </Card>
@@ -104,7 +105,7 @@ const MilkRequiredReport = () => {
                     <CustomButton
                       buttonName="View Slot"
                       onClick={handleViewVendorEvening}
-                      sx={{backgroundColor:"#72C41A"}}
+                      sx={{backgroundColor:"green"}}
                     
                     />
                   </Card>
@@ -115,7 +116,7 @@ const MilkRequiredReport = () => {
                     <CustomButton
                       buttonName="View Slot"
                       onClick={handleViewDistributorMorning}
-                      sx={{backgroundColor:"#72C41A"}}
+                      sx={{backgroundColor:"green"}}
 
                     />
                   </Card>
@@ -126,7 +127,7 @@ const MilkRequiredReport = () => {
                     <CustomButton
                       buttonName="View Slot"
                       onClick={handleViewDistributorEvening}
-                      sx={{backgroundColor:"#72C41A"}}
+                      sx={{backgroundColor:"green"}}
 
                     />
                   </Card>
@@ -137,7 +138,6 @@ const MilkRequiredReport = () => {
             </Card>
           </Col>
         </Row>
-      </Spin>
     </div>
   );
 };

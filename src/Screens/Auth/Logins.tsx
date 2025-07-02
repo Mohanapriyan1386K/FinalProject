@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import CustomInputField from "../../Compontents/CoustomInputFiled";
 import CustomButton from "../../Compontents/CoustomButton";
+import { useUserdata,useUsertype } from "../../Hooks/UserHook";
 import { assets } from "../../Uitils/Assets";
 import { sha1 } from "js-sha1";
 import { logindata } from "../../Services/ApiService";
@@ -8,7 +9,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { setEncryptedCookie } from "../../Uitils/Cookeis";
+import { setEncryptedCookie} from "../../Uitils/Cookeis";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { saltkey } from "../../../public/config";
@@ -20,7 +21,16 @@ const validationSchema = Yup.object({
 });
 
 function Logins() {
+  const token =useUserdata()
+  const user_type=useUsertype()
   const navigate = useNavigate();
+
+  // Auto redirect if already logged in
+  useEffect(() => {
+    if (token && user_type === 1) {
+      navigate("/dashboard");
+    }
+  }, []);
 
   // Login handler
   const handleLogin = (values: { user_name: string; password: string }) => {

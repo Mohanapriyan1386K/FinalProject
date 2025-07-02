@@ -1,30 +1,25 @@
-import { Box, Typography, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
-const PageNotFound = () => {
-  const navigate = useNavigate();
+import "../../Styles/ThreeD404Page.css";
+import astronaut from "../../assets/Images/png/image.png";
+import CustomButton from "../../Compontents/CoustomButton";
+import { Typography } from "antd";
 
+const  PageNotFound = () => {
   return (
-    <Box
-      height="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      flexDirection="column"
-      textAlign="center"
-      bgcolor="#f8f9fa"
-    >
-      <Typography variant="h3" fontWeight="bold" gutterBottom>
-        404 - Page Not Found
-      </Typography>
-      <Typography variant="body1" color="textSecondary" mb={3}>
-        Oops! The page you are looking for does not exist.
-      </Typography>
-      <Button variant="contained" color="primary" onClick={() => navigate("/")}>
-        go to  Back
-      </Button>
-    </Box>
+    <div className="space404-container">
+      <div className="space404-text">
+        <h1>404 - error</h1>
+        <h2>PAGE NOT FOUND</h2>
+        <Typography></Typography>
+        <p>Oops! This page could not be found </p>
+        {/* <a href="/" className="space404-button">Back To Home</a> */}
+        <CustomButton buttonName="Back" sx={{paddingLeft:4,paddingRight:4,backgroundColor:"black"}} />
+      </div>
+      <div className="space404-image">
+        <img src={astronaut} alt="Astronaut reading" />
+      </div>
+    </div>
   );
 };
 
-export default PageNotFound;
+export default  PageNotFound;

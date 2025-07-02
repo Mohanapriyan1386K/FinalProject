@@ -29,7 +29,7 @@ const InventoryLineChart: React.FC<Props> = ({ mrngData, eveningData }) => {
       title="Daily Inventory Trend"
       categories={categories}
       series={series}
-      colors={['#007bff', '#e91e63']}
+      colors={['#2E7D32', '#e91e63']}
     />
   );
 };

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Table, Typography, Tag, message, Button, Skeleton } from "antd";
+import { Table, Typography, Tag, message} from "antd";
 import { toast } from "react-toastify";
 import { distributorList } from "../../../Services/ApiService";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../../../Compontents/CoustomButton";
 import { useUserdata } from "../../../Hooks/UserHook";
-import { Box } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import Loader from "../../../Compontents/Loader";
 
 const { Text } = Typography;
@@ -92,15 +92,20 @@ const Distributor = () => {
       key: "status",
       width: 120,
       render: (status: number) =>
-        status === 1 ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+        status === 1 ? (
+          <Tag color="green">Active</Tag>
+        ) : (
+          <Tag color="red">Inactive</Tag>
+        ),
     },
     {
       title: "Action",
       key: "action",
       width: 140,
       render: (_: any, record: Route) => (
-        <Button
-          type="link"
+        <CustomButton
+          buttonName="View"
+          variant="outlined"
           onClick={() =>
             handleRouteDetailPage(
               record,
@@ -108,9 +113,7 @@ const Distributor = () => {
               record.__distributorName as string
             )
           }
-        >
-          View Details
-        </Button>
+        />
       ),
     },
   ];
@@ -131,57 +134,60 @@ const Distributor = () => {
   };
 
   return (
-  <Box>
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: "30px",
-        backgroundColor: "#F6FFED",
-        padding: 2,
-      }}
-    >
-      <h2>Distributor List</h2>
-      <CustomButton
-        buttonName="Slot Assign"
-        sx={{ backgroundColor: "#1B5E20" }}
-        onClick={() => navigate("Slotassign")}
-      />
+    <Box>
+      <Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "30px",
+            backgroundColor: "#E8F5E9",
+            padding: 2,
+          }}
+        >
+          <Typography style={{fontSize:"25px", fontWeight:"600"}}>Distributor List</Typography>
+          <CustomButton
+            buttonName="Slot Assign"
+            sx={{ backgroundColor: "#1B5E20" }}
+            onClick={() => navigate("Slotassign")}
+          />
+        </Box>
+      </Paper>
+
+      {loading ? (
+        <Loader />
+      ) : (
+        <Paper sx={{padding:2,backgroundColor:"#E8F5E9"}}>
+        <Table
+          dataSource={distributors}
+          columns={distributorColumns}
+          rowKey="distributer_id"
+          expandable={{
+            expandedRowRender: (record) =>
+              (record?.line_data ?? []).length > 0 ? (
+                <Table
+                  dataSource={
+                    record.line_data?.map((route) => ({
+                      ...route,
+                      __parentId: record.distributer_id,
+                      __distributorName: record.distributer_name,
+                    })) ?? []
+                  }
+                  columns={routeColumns}
+                  pagination={false}
+                  rowKey="id"
+                />
+              ) : (
+                <Text type="secondary">No route data available.</Text>
+              ),
+            rowExpandable: () => true,
+          }}
+          pagination={false}
+        />
+         </Paper>
+      )}
     </Box>
+  );
+};
 
-    {loading ? (
-      <Loader />
-    ) : (
-      <Table
-        dataSource={distributors}
-        columns={distributorColumns}
-        rowKey="distributer_id"
-        expandable={{
-          expandedRowRender: (record) =>
-            (record?.line_data ?? []).length > 0 ? (
-              <Table
-                dataSource={
-                  record.line_data?.map((route) => ({
-                    ...route,
-                    __parentId: record.distributer_id,
-                    __distributorName: record.distributer_name,
-                  })) ?? []
-                }
-                columns={routeColumns}
-                pagination={false}
-                rowKey="id"
-              />
-            ) : (
-              <Text type="secondary">No route data available.</Text>
-            ),
-          rowExpandable: () => true,
-        }}
-        pagination={false}
-      />
-    )}
-  </Box>
-);
-}
-
-
-export default Distributor
+export default Distributor;

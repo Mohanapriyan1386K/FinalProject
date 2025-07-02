@@ -1,12 +1,12 @@
 import "./App.css";
 import { ToastContainer } from "react-toastify";
 import AppRouterProvider from "./Router/MainRoute";
-
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <div>
-      <ToastContainer position="top-center" autoClose={3000} />
-       <AppRouterProvider/>
+    <ToastContainer autoClose={1000} />
+      <AppRouterProvider />
     </div>
   );
 }

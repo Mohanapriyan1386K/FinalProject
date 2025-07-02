@@ -5,14 +5,20 @@ import { encryptData, decryptData } from "./crypto";
 export const setEncryptedCookie = (
   name: string,
   data: object | string,
+  days: number = 7,
 ) => {
   const encrypted = encryptData(data);
   Cookies.set(name, encrypted, {
     secure: true,
     sameSite: "Strict",
+    expires: 8, 
   });
 };
 
+// Utility to check if a string is JSON
+const isJsonString = (str: string): boolean => {
+  return str.startsWith("{") || str.startsWith("[");
+};
 // Get decrypted cookie
 export const getDecryptedCookie = <T = any>(name: string): T | string | null => {
   const encrypted = Cookies.get(name);
@@ -27,8 +33,4 @@ export const clearCookie = (name: string) => {
   Cookies.remove(name, { secure: true, sameSite: "Strict" });
 };
 
-// Utility to check if a string is JSON
-const isJsonString = (str: string): boolean => {
-  return str.startsWith("{") || str.startsWith("[");
-};
 

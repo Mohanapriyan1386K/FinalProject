@@ -1,3 +1,4 @@
+// All imports remain same
 import { useEffect, useState } from "react";
 import {
   getdailinventroy,
@@ -17,19 +18,19 @@ import {
   EditOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import AddIcon from "@mui/icons-material/Add";
-import InventoryLineChart from "../../Charts/InventoryLineChart";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import MilkRequiredReport from "./MilkRequiredReport";
-import { Box } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { useUserdata } from "../../../Hooks/UserHook";
 import UpdateInventoryModal from "../../Modal/UpdateinventroyModel";
 import Distrbutedeinventorymodal from "../../Modal/DistributedLoginventory";
 import AddInventoryModal from "../../Modal/AddInventoryModal";
+import InventoryLineChart from "../../Charts/InventoryLineChart";
+import MilkRequiredReport from "./MilkRequiredReport";
 import CustomTable from "../../../Compontents/CustomTable";
+import CustomButton from "../../../Compontents/CoustomButton";
 
 interface SlotData {
   date: string;
@@ -45,7 +46,7 @@ interface DailyInventory {
 }
 
 interface InventoryItem {
-  id: any;
+  id: number;
   slot_id: number;
   slot_name: string;
   total_quantity: number;
@@ -60,106 +61,74 @@ interface InventoryItem {
   is_update_status: number;
 }
 
-interface InventoryTransaction {
-  id: number;
-  inventory_id: number;
-  quantity: number;
-  created_at: string;
-  updated_at: string | null;
-  status: number;
-  status_text: string;
-  type: string;
-  type_id: number;
-  customer_name: string | null;
-  given_by_name: string;
-  created_by: number;
-  slot_id: number;
-  slot_name: string;
-  pervious_quantity: number;
-  remaining_quantity: number;
-  comment: string;
-}
-
-interface whole {
+interface WholeData {
   is_update_status: number;
+  is_add_status: number;
 }
 
-const validationSchema = Yup.object({
+const addUpdateValidationSchema = Yup.object({
   total_quantity: Yup.number().required("Total quantity is required"),
   comment: Yup.string().nullable(),
 });
 
+const distributeValidationSchema = Yup.object({
+  total_quantity: Yup.number().required("Total quantity is required"),
+  milk_give_type: Yup.string().required("Milk give type is required"),
+  distributor_id: Yup.string().required("Distributor is required"),
+});
+
 function AdminDashboard() {
   const navigate = useNavigate();
+  const token = useUserdata();
+
   const [dailyInventory, setDailyInventory] = useState<DailyInventory | null>(
     null
   );
   const [inventoryList, setInventoryList] = useState<InventoryItem[]>([]);
-  const [wholedata, setWholedata] = useState<whole>();
+  const [wholedata, setWholedata] = useState<WholeData>();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddModalOpeninven, setIsAddModalOpeninven] = useState(false);
-  const [islist_inventory_logs, setlist_inventory_logs] = useState<
-    InventoryTransaction[]
-  >([]);
 
-  const token = useUserdata();
-
-  // Update formik
   const updateFormik = useFormik({
-    initialValues: {
-      id: 0,
-      total_quantity: 0,
-      comment: "",
-    },
-    validationSchema,
+    initialValues: { id: 0, total_quantity: 0, comment: "" },
+    validationSchema: addUpdateValidationSchema,
     onSubmit: async (values) => {
       const payload = new FormData();
       payload.append("token", token);
       payload.append("inventory_id", values.id.toString());
       payload.append("total_quantity", values.total_quantity.toString());
       payload.append("comment", values.comment);
-
       UpdateInventory(payload)
         .then((res) => {
           toast.success(res.data.msg);
           setIsEditModalOpen(false);
           fetchInventoryList();
         })
-        .catch((error) => {
-          toast.error("Failed to update inventory.");
-          console.error(error);
-        });
+        .catch(() => toast.error("Failed to update inventory."));
     },
   });
 
-  // Add formik
   const addFormik = useFormik({
-    initialValues: {
-      total_quantity: 0,
-      comment: "",
-    },
-    validationSchema,
-    onSubmit: (values) => {
+    initialValues: { total_quantity: 0, comment: "" },
+    validationSchema: addUpdateValidationSchema,
+    onSubmit: async (values) => {
       const payload = new FormData();
       payload.append("token", token);
       payload.append("total_quantity", values.total_quantity.toString());
       payload.append("comment", values.comment);
-
       AddInventory(payload)
         .then((res) => {
           toast.success(res.data.msg);
           setIsAddModalOpen(false);
           fetchInventoryList();
         })
-        .catch((error) => {
-          toast.error("Failed to add inventory.");
-          console.error(error);
-        });
+        .catch(() => toast.error("Failed to add inventory."));
     },
   });
 
@@ -169,24 +138,20 @@ function AdminDashboard() {
       milk_give_type: "",
       distributor_id: "",
     },
-    validationSchema, // Ensure this includes all fields
+    validationSchema: distributeValidationSchema,
     onSubmit: async (values) => {
       const payload = new FormData();
       payload.append("token", token);
       payload.append("given_qty", values.total_quantity.toString());
       payload.append("type", values.milk_give_type);
       payload.append("distributer_id", values.distributor_id);
-
       distributedloginventoy(payload)
-        .then((res) => {
+        .then(() => {
           toast.success("Distributed inventory successfully.");
           setIsAddModalOpeninven(false);
           fetchInventoryList();
         })
-        .catch((error) => {
-          toast.error("Failed to distribute inventory.");
-          console.error(error);
-        });
+        .catch(() => toast.error("Failed to distribute inventory."));
     },
   });
 
@@ -194,30 +159,28 @@ function AdminDashboard() {
     setTableLoading(true);
     const payload = new FormData();
     payload.append("token", token);
-    Listinventory(page, 10, payload)
+    Listinventory(page, pageSize, payload)
       .then((res) => {
         setInventoryList(res.data.data);
         setWholedata(res.data);
         setTotal(res.data?.total || 0);
       })
-      .catch((error) => {
-        console.error("FAILED LIST INVENTORY DATA", error);
-      })
-      .finally(() => {
-        setTableLoading(false);
-      });
+      .catch((error) => console.error("FAILED LIST INVENTORY DATA", error))
+      .finally(() => setTableLoading(false));
   };
 
   const getallinventorydata = () => {
     const payload = new FormData();
     payload.append("token", token);
-    getdailinventroy(payload).then((res) => {
-      const invData = res?.data?.data;
-      if (Array.isArray(invData) && invData.length > 0) {
-        setDailyInventory(invData[0]);
-      }
-      setLoading(false);
-    });
+    getdailinventroy(payload)
+      .then((res) => {
+        const invData = res?.data?.data;
+        if (Array.isArray(invData) && invData.length > 0) {
+          setDailyInventory(invData[0]);
+        }
+      })
+      .catch(() => toast.error("Failed to load inventory summary."))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -227,21 +190,16 @@ function AdminDashboard() {
   useEffect(() => {
     if (!token) return;
     fetchInventoryList();
-  }, [page, token]);
+  }, [page, pageSize, token]);
 
   const handleView = (record: InventoryItem) => {
     const payload = new FormData();
     payload.append("token", token);
-    payload.append("inventory_id", record.id);
-
+    payload.append("inventory_id", record.id.toString());
     list_inventory_log(payload, 1, 10).then((res) => {
       const logs = res.data.data;
-      setlist_inventory_logs(logs);
       navigate("inventorylistview", {
-        state: {
-          userid: record.id,
-          logs: logs,
-        },
+        state: { userid: record.id, logs },
       });
     });
   };
@@ -257,14 +215,21 @@ function AdminDashboard() {
 
   const handleAdd = (record: InventoryItem) => {
     distributeFormik.setValues({
-      id: record.id,
       total_quantity: record.total_quantity,
-      comment: record.comment || "",
+      milk_give_type: "",
+      distributor_id: "",
     });
     setIsAddModalOpeninven(true);
   };
 
   const columns = [
+    {
+      title: "S.No",
+      render: (_: any, __: any, index: number) => (
+        <span>{(page - 1) * pageSize + index + 1}</span>
+      ),
+      width: 60,
+    },
     {
       title: "Slot Name",
       dataIndex: "slot_name",
@@ -311,7 +276,7 @@ function AdminDashboard() {
             icon={<EyeOutlined />}
             onClick={() => handleView(record)}
           />
-          {!(wholedata?.is_update_status === 0 && record.status === 2) && (
+          {wholedata?.is_update_status === 1 && record.status === 1 && (
             <>
               <Button
                 type="link"
@@ -320,7 +285,7 @@ function AdminDashboard() {
               />
               <Button
                 type="link"
-                icon={<AddIcon style={{ color: "#2E7D32" }} />}
+                icon={<PlusOutlined style={{ color: "#2E7D32" }} />}
                 onClick={() => handleAdd(record)}
               />
             </>
@@ -332,11 +297,12 @@ function AdminDashboard() {
 
   return (
     <>
-      <Card style={{ backgroundColor: "#f6ffed" }}>
+       <Paper sx={{padding:2, backgroundColor:"#E8F5E9"}}>
         <Typography.Title level={3} style={{ fontWeight: 700 }}>
           INVENTORY
         </Typography.Title>
-      </Card>
+       </Paper>
+      
 
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 40 }}>
@@ -347,11 +313,13 @@ function AdminDashboard() {
           {dailyInventory && (
             <Row gutter={16} style={{ marginTop: 20 }}>
               <Col xs={24} md={8}>
-                <Card style={{ backgroundColor: "#e8f5e9" }}>
-                  <Row align="middle" gutter={8}>
+                <Card
+                  style={{ backgroundColor: "#e8f5e9", borderRadius: "10px" }}
+                >
+                  <Row align="middle" gutter={12}>
                     <Col>
                       <ClockCircleOutlined
-                        style={{ fontSize: 20, color: "#1890ff" }}
+                        style={{ fontSize: 22, color: "#1890ff" }}
                       />
                     </Col>
                     <Col>
@@ -366,12 +334,15 @@ function AdminDashboard() {
                   </Row>
                 </Card>
               </Col>
+
               <Col xs={24} md={8}>
-                <Card style={{ backgroundColor: "#fff0f6" }}>
-                  <Row align="middle" gutter={8}>
+                <Card
+                  style={{ backgroundColor: "#fff0f6", borderRadius: "10px" }}
+                >
+                  <Row align="middle" gutter={12}>
                     <Col>
                       <FieldTimeOutlined
-                        style={{ fontSize: 20, color: "#c41d7f" }}
+                        style={{ fontSize: 22, color: "#c41d7f" }}
                       />
                     </Col>
                     <Col>
@@ -386,12 +357,15 @@ function AdminDashboard() {
                   </Row>
                 </Card>
               </Col>
+
               <Col xs={24} md={8}>
-                <Card style={{ backgroundColor: "#f6ffed" }}>
-                  <Row align="middle" gutter={8}>
+                <Card
+                  style={{ backgroundColor: "#f6ffed", borderRadius: "10px" }}
+                >
+                  <Row align="middle" gutter={12}>
                     <Col>
                       <AppstoreAddOutlined
-                        style={{ fontSize: 20, color: "#389e0d" }}
+                        style={{ fontSize: 22, color: "#389e0d" }}
                       />
                     </Col>
                     <Col>
@@ -426,13 +400,24 @@ function AdminDashboard() {
             <Card
               title="Inventory List"
               extra={
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setIsAddModalOpen(true)}
-                >
-                  Add
-                </Button>
+                wholedata?.is_add_status === 1 ? (
+                  <CustomButton
+                    buttonName="Add"
+                    onClick={() => setIsAddModalOpen(true)}
+                    sx={{ backgroundColor: "green" }}
+                  />
+                ) : (
+                  <Paper
+                    sx={{
+                      padding: 1,
+                      backgroundColor: "#e8f5e9",
+                      color: "red",
+                      fontWeight: "700",
+                    }}
+                  >
+                    This Time Inventory will be closed
+                  </Paper>
+                )
               }
             >
               <CustomTable
@@ -440,7 +425,11 @@ function AdminDashboard() {
                 columns={columns}
                 currentPage={page}
                 total={total}
-                onPageChange={(newPage) => setPage(newPage)}
+                onPageChange={(newPage, newSize) => {
+                  setPage(newPage);
+                  setPageSize(newSize);
+                }}
+                pageSize={pageSize}
                 loading={tableLoading}
               />
             </Card>
@@ -467,7 +456,7 @@ function AdminDashboard() {
         </>
       )}
 
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
 }

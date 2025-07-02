@@ -1,14 +1,13 @@
 import * as Yup from "yup";
 import CustomInputField from "../../Compontents/CoustomInputFiled";
 import { forgetpassword } from "../../Services/ApiService";
-import { ToastContainer, toast } from "react-toastify";
+import {toast } from "react-toastify";
 import { useFormik } from "formik";
 import CustomButton from "../../Compontents/CoustomButton";
 import { Box, Typography } from "@mui/material";
 import assets from "../../Uitils/Assets";
 import { useNavigate } from "react-router-dom";
 import { setEncryptedCookie } from "../../Uitils/Cookeis";
-import { useEffect } from "react";
 
 const validationSchema = Yup.object({
   email: Yup.string().required("Email is required"),
@@ -25,14 +24,14 @@ function ForgetPassword() {
     forgetpassword(formdatas)
       .then((response) => {
         if (response.data.status === 0) {
-          toast.error("Error");
+          toast.error(response.data.msg);
         } else if (response.data.status === 1) {
           toast.success("OTP successfully sent", {
             autoClose: 1000,
             onClose: () => navigate("/verify-otp"),
           });
           setEncryptedCookie("reset_key", response.data.reset_key);
-          setEncryptedCookie("otp_verify",response.data.reset_key)
+          setEncryptedCookie("otp_verify", response.data.reset_key);
         }
       })
       .catch((error) => {
@@ -56,11 +55,10 @@ function ForgetPassword() {
         justifyContent: "center",
         alignItems: "center",
         fontFamily: "Poppins, sans-serif",
-        background:`url(${assets.Background})`,
-        backgroundSize:"cover"
+        background: `url(${assets.Background})`,
+        backgroundSize: "cover",
       }}
     >
-      <ToastContainer />
       <Box
         padding={5}
         display="flex"
@@ -91,11 +89,7 @@ function ForgetPassword() {
           Forgot Your Password?
         </Typography>
 
-        <Typography
-          fontSize={16}
-          color="gray"
-          textAlign="center"
-        >
+        <Typography fontSize={16} color="gray" textAlign="center">
           Enter your email or phone to receive a reset code
         </Typography>
 
@@ -133,6 +127,7 @@ function ForgetPassword() {
               },
             }}
           />
+          <CustomButton buttonName="back" variant="text" onClick={()=>navigate(-1)}  />
         </Box>
       </Box>
     </Box>

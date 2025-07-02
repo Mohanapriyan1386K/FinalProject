@@ -1,5 +1,6 @@
 import { Box, Paper } from "@mui/material";
-import { Typography, Tooltip } from "antd";
+import {Tooltip } from "antd";
+import {Typography} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,6 +19,7 @@ import Loader from "../../../Compontents/Loader";
 import CustomTable from "../../../Compontents/CustomTable";
 import CustomDropDown from "../../../Compontents/CustomDropDown";
 import { useFormik } from "formik";
+
 
 interface SlotData {
   id: number;
@@ -86,6 +88,7 @@ function UserMangement() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(10);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<UserFullView | null>(null);
@@ -116,7 +119,7 @@ function UserMangement() {
       if (value) payload.append(key, value);
     });
 
-    fetchUserList(currentPage, 10, payload)
+    fetchUserList(currentPage, pageSize, payload)
       .then((res) => {
         const data = res.data?.data || [];
         setUsers(data);
@@ -130,7 +133,12 @@ function UserMangement() {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, submittedFilters]);
+  }, [currentPage, pageSize, submittedFilters]);
+
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
 
   const onDelete = (record: User) => {
     handleUserDeleteOrToggle(record, token, -1, fetchData);
@@ -153,6 +161,15 @@ function UserMangement() {
   };
 
   const columns = [
+    {
+    title: "S.No",
+    render: (_: any, __: any, index: number) => (
+      <span style={{ fontSize: 12 }}>
+        {(currentPage - 1) * pageSize + index + 1}
+      </span>
+    ),
+    width: 70,
+  },
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "User Type", dataIndex: "user_type", key: "user_type" },
     {
@@ -188,7 +205,7 @@ function UserMangement() {
       title: "Actions",
       key: "actions",
       render: (_: any, record: User) => (
-        <Box sx={{ display: "flex",gap:1, justifyContent:"space-around" }}>
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "space-around" }}>
           <Tooltip title="Edit">
             {record.status === 1 && (
               <EditOutlined
@@ -253,7 +270,7 @@ function UserMangement() {
             alignItems: "center",
           }}
         >
-          <Typography style={{ fontSize: "25px" }}>User Management</Typography>
+          <Typography style={{ fontSize: "25px", color:"black", fontWeight:700 }}>User Management</Typography>
           <CustomButton
             buttonName="ADD USER"
             sx={{ backgroundColor: "#1b5e20" }}
@@ -261,46 +278,46 @@ function UserMangement() {
           />
         </Box>
       </Paper>
-      <Paper sx={{backgroundColor:"#E8F5E9",padding:2}}>
-      <form onSubmit={formik.handleSubmit}>
-        <CustomDropDown
-          dropdownKeys={[
-            "user_type",
-            "customer_type",
-            "pay_type",
-            "line_id",
-            "price_tag_id",
-            "status",
-          ]}
-          formik={formik}
-        />
 
-        <div className="d-flex gap-2 my-2">
-          <CustomButton
-            variant="outlined"
-            buttonName="FILTER"
-            type="submit"
-            sx={{backgroundColor:"green",color:"white"}}
-
+      <Paper sx={{ backgroundColor: "#E8F5E9", padding: 2 }}>
+        <form onSubmit={formik.handleSubmit}>
+          <CustomDropDown
+            dropdownKeys={[
+              "user_type",
+              "customer_type",
+              "pay_type",
+              "line_id",
+              "price_tag_id",
+              "status",
+            ]}
+            formik={formik}
           />
-          <CustomButton
-            variant="outlined"
-            buttonName="RESET"
-            type="button"
-            sx={{backgroundColor:"red",color:"white"}}
-            onClick={() => {
-              formik.resetForm();
-              setSubmittedFilters({});
-              setCurrentPage(1);
-            }}
-          />
-        </div>
-      </form>
-        </Paper>
 
-      <Paper sx={{backgroundColor:"#E8F5E9"}} >
+          <div className="d-flex gap-2 my-2">
+            <CustomButton
+              variant="outlined"
+              buttonName="FILTER"
+              type="submit"
+              sx={{ backgroundColor: "green", color: "white" }}
+            />
+            <CustomButton
+              variant="outlined"
+              buttonName="RESET"
+              type="button"
+              sx={{ backgroundColor: "red", color: "white" }}
+              onClick={() => {
+                formik.resetForm();
+                setSubmittedFilters({});
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        </form>
+      </Paper>
+
+      <Paper sx={{ backgroundColor: "#E8F5E9" }}>
         <Box style={{ padding: 20 }}>
-          <Typography.Title level={3}>User List</Typography.Title>
+          <Typography sx={{color:"black",fontSize:20}}>User List</Typography>
           {loading ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Loader />
@@ -311,7 +328,8 @@ function UserMangement() {
               columns={columns}
               currentPage={currentPage}
               total={total}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
+              pageSize={pageSize}
               loading={loading}
             />
           )}
