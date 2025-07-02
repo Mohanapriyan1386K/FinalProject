@@ -5,7 +5,7 @@ import { encryptData, decryptData } from "./crypto";
 export const setEncryptedCookie = (
   name: string,
   data: object | string,
-  days: number = 7,
+  _days: number = 7,
 ) => {
   const encrypted = encryptData(data);
   Cookies.set(name, encrypted, {
