@@ -1,6 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
 import Cookies from "js-cookie";
-import type { ReactNode } from "react";
 import { useUserdata, useUsertype } from "../Hooks/UserHook";
 
 // Public-only routes (like login, forgot password)
