@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import CustomInputField from "../../Compontents/CoustomInputFiled";
 import CustomButton from "../../Compontents/CoustomButton";
-import { useUserdata,useUsertype } from "../../Hooks/UserHook";
+import { useUserdata, useUsertype } from "../../Hooks/UserHook";
 import { assets } from "../../Uitils/Assets";
 import { sha1 } from "js-sha1";
 import { logindata } from "../../Services/ApiService";
@@ -9,7 +9,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { setEncryptedCookie} from "../../Uitils/Cookeis";
+import { setEncryptedCookie } from "../../Uitils/Cookeis";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { saltkey } from "../../../public/config";
@@ -21,16 +21,19 @@ const validationSchema = Yup.object({
 });
 
 function Logins() {
-  const token =useUserdata()
-  const user_type=useUsertype()
+  const token = useUserdata();
+  const userType = useUsertype();
   const navigate = useNavigate();
 
-  // Auto redirect if already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    if (token && user_type === 1) {
+    if (token && (userType === 1)) {
       navigate("/dashboard");
     }
-  }, []);
+    else if(token &&(userType===4)){
+      navigate("/distributor")
+    }
+  }, [token, userType, navigate]);
 
   // Login handler
   const handleLogin = (values: { user_name: string; password: string }) => {
@@ -42,7 +45,7 @@ function Logins() {
 
     logindata(formdatas)
       .then((res) => {
-        if (res.data.token) {
+        if (res && res.data?.token) {
           const userData = {
             token: res.data.token,
             user_id: res.data.user_id,
@@ -52,13 +55,21 @@ function Logins() {
             is_occasional: res.data.is_occasional,
           };
 
+          // Save encrypted cookie
           setEncryptedCookie("user_token", userData);
           Cookies.set("user_type", res.data.user_type.toString());
+
           toast.success("Login successful!");
 
-          const userType = res.data.user_type.toString();
-          if (userType === "1") {
+          // Navigate immediately using returned user_type
+          if (res.data.user_type === 1) {
             navigate("/dashboard");
+          }
+          else if(res.data.user_type===4){
+             navigate("/distributor")
+          }
+          else {
+            toast.error("Unauthorized user type");
           }
         } else {
           toast.error("Invalid credentials or missing token");

@@ -1,6 +1,6 @@
 import { Box, Paper } from "@mui/material";
-import {Tooltip } from "antd";
-import {Typography} from "@mui/material";
+import { Tooltip } from "antd";
+import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,7 +19,6 @@ import Loader from "../../../Compontents/Loader";
 import CustomTable from "../../../Compontents/CustomTable";
 import CustomDropDown from "../../../Compontents/CustomDropDown";
 import { useFormik } from "formik";
-
 
 interface SlotData {
   id: number;
@@ -162,14 +161,14 @@ function UserMangement() {
 
   const columns = [
     {
-    title: "S.No",
-    render: (_: any, __: any, index: number) => (
-      <span style={{ fontSize: 12 }}>
-        {(currentPage - 1) * pageSize + index + 1}
-      </span>
-    ),
-    width: 70,
-  },
+      title: "S.No",
+      render: (_: any, __: any, index: number) => (
+        <span style={{ fontSize: 12 }}>
+          {(currentPage - 1) * pageSize + index + 1}
+        </span>
+      ),
+      width: 70,
+    },
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "User Type", dataIndex: "user_type", key: "user_type" },
     {
@@ -270,10 +269,20 @@ function UserMangement() {
             alignItems: "center",
           }}
         >
-          <Typography style={{ fontSize: "25px", color:"black", fontWeight:700 }}>User Management</Typography>
+          <Typography
+            style={{ fontSize: "25px", color: "black", fontWeight: 700 }}
+          >
+            User Management
+          </Typography>
           <CustomButton
             buttonName="ADD USER"
-            sx={{ backgroundColor: "#1b5e20" }}
+            sx={{
+              backgroundColor: "#008000",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "#006400",
+              },
+            }}
             onClick={() => navigate("/dashboard/createuser")}
           />
         </Box>
@@ -298,7 +307,9 @@ function UserMangement() {
               variant="outlined"
               buttonName="FILTER"
               type="submit"
-              sx={{ backgroundColor: "green", color: "white" }}
+              sx={{ backgroundColor: "green", color: "white","&:hover": {
+                backgroundColor: "#006400",
+              }, }}
             />
             <CustomButton
               variant="outlined"
@@ -317,7 +328,9 @@ function UserMangement() {
 
       <Paper sx={{ backgroundColor: "#E8F5E9" }}>
         <Box style={{ padding: 20 }}>
-          <Typography sx={{color:"black",fontSize:20}}>User List</Typography>
+          <Typography sx={{ color: "black", fontSize: 20 }}>
+            User List
+          </Typography>
           {loading ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
               <Loader />

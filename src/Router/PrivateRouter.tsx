@@ -10,9 +10,9 @@ export const AuthPrivate = () => {
   if (!token) return <Outlet />;
 
   // Redirect based on role
-  if (type === 1) return <Navigate to="/dashboard" replace />;
-  if (type === 2) return <Navigate to="/vendordashboard" replace />;
-  if (type === 3) return <Navigate to="/userdashboard" replace />;
+  if (type == 1) return <Navigate to="/dashboard" replace />;
+  if (type == 4) return <Navigate to="/distubuted" replace />;
+  if (type == 3) return <Navigate to="/userdashboard" replace />;
 
   return <Navigate to="/" replace />;
 };
@@ -25,11 +25,11 @@ export const AdminPrivate = () => {
 };
 
 // Vendor route guard
-export const VendorPrivate = () => {
+export const DistributorPrivate = () => {
   const token = useUserdata();
   const type = useUsertype();
 
-  return token && type === 2 ? <Outlet /> : <Navigate to="/" replace />;
+  return token && type === 4 ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 // User route guard

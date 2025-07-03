@@ -1,4 +1,3 @@
-// src/Components/Sidebar.tsx
 import { NavLink } from "react-router-dom";
 import assets from "../Uitils/Assets";
 import {
@@ -11,44 +10,58 @@ import {
   Box,
   Typography,
   Divider,
+  IconButton,
 } from "@mui/material";
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import LogoutIcon from "@mui/icons-material/Logout";
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
+import { useUsertype } from "../Hooks/UserHook";
 
-const drawerWidth = 240;
+// Define numeric roles
+// 1 = Admin, 2 = Vendor, 3 = Distributor
+
 const menuItems = [
   {
-    text: "User Management",
+    text: "User",
     to: "/dashboard",
-    icon: <GroupAddIcon/>,
-    
+    icon: <GroupAddIcon />,
+    allowedUserTypes: [1], // Only admin
   },
   {
-    text: "Inventory Management",
+    text: "Inventory",
     to: "/dashboard/inventory",
     icon: <DashboardCustomizeIcon />,
+    allowedUserTypes: [1], // Admin and Vendor
   },
   {
     text: "Distributed",
     to: "/dashboard/distributedList",
     icon: <LocalShippingIcon />,
+    allowedUserTypes: [1], // Admin and Distributor
   },
+  {
+    text:"Users",
+    to:"/distributor",
+    icon:<GroupAddIcon/>,
+    allowedUserTypes: [4],
+    
+  }
 ];
 
 const Sidebar = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const usertype = useUsertype();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
-  const openLogoutModal = () => {
-    setIsModalOpen(true);
+  const toggleSidebar = () => {
+    setCollapsed((prev) => !prev);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  const drawerWidth = collapsed ? 80 : 200;
 
   return (
     <Drawer
@@ -61,73 +74,94 @@ const Sidebar = () => {
           boxSizing: "border-box",
           backgroundColor: "#e8f5e9",
           color: "#1b5e20",
+          transition: "width 0.3s ease",
         },
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ justifyContent: collapsed ? "center" : "space-around" }}>
         <Box display="flex" alignItems="center">
-          <img src={assets.Logo} width={60} alt="Logo" />
-          <Typography
-            variant="h6"
-            sx={{ color: "#2e7d32", fontWeight: "bold", ml: 1 }}
-          >
-            MilkPro Sales
-          </Typography>
+          {!collapsed && (
+            <Typography
+              variant="h6"
+              sx={{
+                color: "#2e7d32",
+                fontWeight: "bold",
+                ml: 1,
+                fontSize: "15px",
+              }}
+            >
+              MilkPro Sales
+            </Typography>
+          )}
         </Box>
+        <IconButton onClick={toggleSidebar}>
+          {collapsed ? <MenuIcon sx={{ color: "green" }} /> : <MenuOpenIcon />}
+        </IconButton>
       </Toolbar>
+
       <Divider />
 
       <Box sx={{ overflow: "auto", p: 1 }}>
         <List>
-          {menuItems.map((item) => (
-            <ListItem
-              key={item.text}
-              component={NavLink}
-              to={item.to}
-              sx={{
-                color: "#1B5E20",
-                "&:hover": { backgroundColor: "#c8e6c9" },
-              }}
-            >
-              <ListItemIcon
+          {menuItems
+            .filter((item) => item.allowedUserTypes.includes(usertype))
+            .map((item) => (
+              <ListItem
+                key={item.text}
+                component={NavLink}
+                to={item.to}
                 sx={{
                   color: "#1B5E20",
                   "&:hover": { backgroundColor: "#c8e6c9" },
+                  borderRadius: 1,
+                  justifyContent: collapsed ? "center" : "flex-start",
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItem>
-          ))}
+                <ListItemIcon
+                  sx={{
+                    color: "#1B5E20",
+                    minWidth: collapsed ? "auto" : "40px",
+                    mr: collapsed ? 0 : 1,
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                {!collapsed && <ListItemText primary={item.text} />}
+              </ListItem>
+            ))}
         </List>
 
-        {/* Logout */}
         <List>
           <ListItem
-            onClick={openLogoutModal}
+            onClick={() => setIsModalOpen(true)}
             sx={{
               borderRadius: 2,
               mb: 1,
               cursor: "pointer",
+              justifyContent: collapsed ? "center" : "flex-start",
               "&:hover": {
                 backgroundColor: "#c8e6c9",
               },
             }}
           >
-            <ListItemIcon>
-              <LogoutIcon sx={{ color: "red" }} />
+            <ListItemIcon
+              sx={{
+                color: "red",
+                minWidth: collapsed ? "auto" : "40px",
+                mr: collapsed ? 0 : 1,
+              }}
+            >
+              <img src={assets.LogoutIcon} width={25} alt="Logout" />
             </ListItemIcon>
-            <ListItemText primary="Logout" sx={{ color: "red" }} />
+            {!collapsed && (
+              <ListItemText primary="Logout" sx={{ color: "red" }} />
+            )}
           </ListItem>
         </List>
       </Box>
 
-      {/* Logout Modal with Props */}
-      <LogoutModal
-        open={isModalOpen}
-        onCancel={handleCancel}
-      />
+      {/* Logout Modal */}
+      <LogoutModal open={isModalOpen} onCancel={() => setIsModalOpen(false)} />
     </Drawer>
   );
 };
