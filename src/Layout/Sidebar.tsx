@@ -11,6 +11,7 @@ import {
   Typography,
   Divider,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -20,62 +21,56 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 import { useUsertype } from "../Hooks/UserHook";
-
+import { useTheme } from "@mui/material/styles";
 
 const menuItems = [
   {
     text: "User",
     to: "/dashboard",
     icon: <GroupAddIcon />,
-    allowedUserTypes: [1], // Only admin
+    allowedUserTypes: [1],
   },
   {
     text: "Inventory",
     to: "/dashboard/inventory",
     icon: <DashboardCustomizeIcon />,
-    allowedUserTypes: [1], 
+    allowedUserTypes: [1],
   },
   {
     text: "Distributed",
     to: "/dashboard/distributedList",
     icon: <LocalShippingIcon />,
-    allowedUserTypes: [1], 
+    allowedUserTypes: [1],
   },
   {
-    text:"Users",
-    to:"/distributor",
-    icon:<GroupAddIcon/>,
+    text: "Users",
+    to: "/distributor",
+    icon: <GroupAddIcon />,
     allowedUserTypes: [4],
-    
-  }
+  },
 ];
 
 const Sidebar = () => {
   const usertype = useUsertype();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
 
-  const toggleSidebar = () => {
-    setCollapsed((prev) => !prev);
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const drawerWidth = collapsed ? 80 : 200;
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          backgroundColor: "#e8f5e9",
-          color: "#1b5e20",
-          transition: "width 0.3s ease",
-        },
-      }}
-    >
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setMobileOpen(!mobileOpen);
+    } else {
+      setCollapsed((prev) => !prev);
+    }
+  };
+
+  const drawerContent = (
+    <>
       <Toolbar sx={{ justifyContent: collapsed ? "center" : "space-around" }}>
         <Box display="flex" alignItems="center">
           {!collapsed && (
@@ -108,6 +103,7 @@ const Sidebar = () => {
                 key={item.text}
                 component={NavLink}
                 to={item.to}
+                onClick={() => isMobile && setMobileOpen(false)}
                 sx={{
                   color: "#1B5E20",
                   "&:hover": { backgroundColor: "#c8e6c9" },
@@ -158,9 +154,42 @@ const Sidebar = () => {
         </List>
       </Box>
 
-      {/* Logout Modal */}
       <LogoutModal open={isModalOpen} onCancel={() => setIsModalOpen(false)} />
-    </Drawer>
+    </>
+  );
+
+  return (
+    <>
+      {/* Hamburger button for mobile */}
+      {isMobile && (
+        <IconButton
+          onClick={toggleSidebar}
+          sx={{ position: "fixed", top: 10, left: 10, zIndex: 1300 }}
+        >
+          <MenuIcon sx={{ color: "#2e7d32" }} />
+        </IconButton>
+      )}
+
+      <Drawer
+        variant={isMobile ? "temporary" : "permanent"}
+        open={isMobile ? mobileOpen : true}
+        onClose={() => setMobileOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            backgroundColor: "#e8f5e9",
+            color: "#1b5e20",
+            transition: "width 0.3s ease",
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+    </>
   );
 };
 

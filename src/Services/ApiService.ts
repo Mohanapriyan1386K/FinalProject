@@ -184,6 +184,18 @@ export const customerdropdown=(payload:any)=>{
     return axiosInstance.post("/milk-api/drop-down/customer-drop-down",payload)
 }
 
-export const assignslotmap=(paylod:any)=>{
-    return axiosInstance.post("/milk-api/slot-assign/assign-slot-map",paylod)
+export const assignslotmap=(payload:any)=>{
+    return axiosInstance.post("/milk-api/slot-assign/assign-slot-map",payload)
+}
+
+export const dailyinventoryreportbydate =(payload:any)=>{
+  return axiosInstance.post("/milk-api/dashboard/daily-inventory-report-by-date",payload)
+}
+
+export const routgetdistributed=(payload:any)=>{
+  return axiosInstance.post("/milk-api/drop-down/lines-drop-down",payload)
+}
+
+export const disributedmilkgivenstaus=(payload:any)=>{
+   return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
 }

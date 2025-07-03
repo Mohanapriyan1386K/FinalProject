@@ -11,3 +11,8 @@
     transform: rotate(360deg);
   }
 }
+
+
+.custom-calendar .ant-picker-panel {
+  background-color:#E8F5E9;
+}
