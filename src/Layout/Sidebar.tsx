@@ -21,8 +21,6 @@ import { useState } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 import { useUsertype } from "../Hooks/UserHook";
 
-// Define numeric roles
-// 1 = Admin, 2 = Vendor, 3 = Distributor
 
 const menuItems = [
   {
@@ -35,13 +33,13 @@ const menuItems = [
     text: "Inventory",
     to: "/dashboard/inventory",
     icon: <DashboardCustomizeIcon />,
-    allowedUserTypes: [1], // Admin and Vendor
+    allowedUserTypes: [1], 
   },
   {
     text: "Distributed",
     to: "/dashboard/distributedList",
     icon: <LocalShippingIcon />,
-    allowedUserTypes: [1], // Admin and Distributor
+    allowedUserTypes: [1], 
   },
   {
     text:"Users",

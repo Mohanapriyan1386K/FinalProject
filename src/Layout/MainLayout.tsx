@@ -2,7 +2,7 @@ import { Box, CssBaseline } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { useUsertype } from "../Hooks/UserHook";
 
-import AdminSidebar from "./Sidebar";
+import Sidebar from "./Sidebar";
 
 const MainLayout = () => {
   const userType = useUsertype();
@@ -13,7 +13,7 @@ const MainLayout = () => {
       <CssBaseline />
       {userType == 1 && (
         <>
-          <AdminSidebar />
+          <Sidebar />
           <Box flexGrow={1} p={2}>
             <Outlet />
           </Box>
@@ -22,7 +22,7 @@ const MainLayout = () => {
       {
         userType==4 &&(
           <>
-             <AdminSidebar/>
+             <Sidebar/>
              <Box>
                <Outlet/>
              </Box>

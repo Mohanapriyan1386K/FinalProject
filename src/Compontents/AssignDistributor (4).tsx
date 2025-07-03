@@ -3,12 +3,15 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { assignslotmap, customerdropdown } from "../../../Services/ApiService";
-import { useUserdata } from "../../../Hooks/UserHook";
-import CustomDropDown from "../../../Compontents/CustomDropDown";
-import CustomButton from "../../../Compontents/CoustomButton";
-import CustomDatePicker from "../../../Compontents/CustomDatePicker";
-import styles from "../../../Styles/Distributor.module.css";
+import {
+  AssignDistributorSlotMap,
+  GetCustomers,
+} from "../../../Service/ApiServices";
+import { useToken } from "../../../Hooks/UserHook";
+import CustomDropDown from "../../../Components/CustomDropDown";
+import CustomButton from "../../../Components/Button";
+import CustomDatePicker from "../../../Components/CustomDatePicker";
+import styles from "./Distributor.module.css";
 import { Select, Spin, Divider, Card, Row, Col } from "antd";
 
 type SlotFormValues = {
@@ -20,7 +23,7 @@ type SlotFormValues = {
 };
 
 type AssignDistributorFormValues = {
-  distributor_id: string; // ✅ fixed key
+  distributer_id: string;
   slot_id: string;
   slots: SlotFormValues[];
 };
@@ -31,7 +34,7 @@ interface CustomerOption {
 }
 
 const assignDistributorSchema = Yup.object().shape({
-  distributor_id: Yup.string().required("Distributor is required"), // ✅ fixed
+  distributer_id: Yup.string().required("Distributor is required"),
   slot_id: Yup.string().required("Slot is required"),
   slots: Yup.array().of(
     Yup.object().shape({
@@ -54,8 +57,9 @@ const assignDistributorSchema = Yup.object().shape({
   ),
 });
 
+
 const AssignDistributor = () => {
-  const token = useUserdata();
+  const token = useToken();
   const [customers, setCustomers] = useState<Record<number, CustomerOption[]>>(
     {}
   );
@@ -65,7 +69,7 @@ const AssignDistributor = () => {
 
   const formik = useFormik<AssignDistributorFormValues>({
     initialValues: {
-      distributor_id: "", 
+      distributer_id: "",
       slot_id: "",
       slots: [
         {
@@ -104,12 +108,14 @@ const AssignDistributor = () => {
 
     const payload: any = {
       token,
-      distributor_id: Number(values.distributor_id),
+      distributor_id: Number(values.distributer_id),
       slot_id: Number(values.slot_id),
       line_data: lineData,
     };
 
-    assignslotmap(payload)
+    console.log("Submitting payload:", payload);
+
+    AssignDistributorSlotMap(payload)
       .then((res) => {
         if (res.data.status === 1) {
           toast.success(res.data.msg || "Assignment successful!");
@@ -153,7 +159,7 @@ const AssignDistributor = () => {
         formData.append("line_id", slot.line_id);
         formData.append("slot_id", slotId);
 
-        customerdropdown(formData)
+        GetCustomers(formData)
           .then((res) => {
             if (res.data.status === 1) {
               const options = res.data.data.map((c: any) => ({
@@ -193,13 +199,18 @@ const AssignDistributor = () => {
         <form onSubmit={formik.handleSubmit}>
           <Row gutter={[16, 16]} className="my-4">
             <Col xs={24} md={12}>
-          <CustomDropDown
-          dropdownKeys={["distributor_id"]}
-          formik={formik}
-        />
+              <CustomDropDown
+                dropdownKeys={["distributer_id"]}
+                formik={formik}
+                className="col-12"
+              />
             </Col>
             <Col xs={24} md={12}>
-              <CustomDropDown dropdownKeys={["slot_id"]} formik={formik} />
+              <CustomDropDown
+                dropdownKeys={["slot_id"]}
+                formik={formik}
+                className="col-12"
+              />
             </Col>
           </Row>
 
@@ -215,14 +226,16 @@ const AssignDistributor = () => {
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div className="fw-bold fs-5">Assignment Details</div>
                   <CustomButton
-                    buttonName="Remove"
+                    className="btn-error btn-sm px-2 py-1"
                     disabled={values.slots.length === 1}
                     onClick={() => {
                       const updatedSlots = [...values.slots];
                       updatedSlots.splice(idx, 1);
                       setFieldValue("slots", updatedSlots);
                     }}
-                  />
+                  >
+                    Remove
+                  </CustomButton>
                 </div>
 
                 <Row gutter={[16, 16]}>
@@ -237,6 +250,7 @@ const AssignDistributor = () => {
                         touched: slotTouched,
                         errors: slotErrors,
                       }}
+                      className="col-12"
                     />
                   </Col>
                 </Row>
@@ -258,6 +272,7 @@ const AssignDistributor = () => {
                         touched={slotTouched.from_date}
                       />
                     </Col>
+
                     <Col xs={24} md={12}>
                       <CustomDatePicker
                         label="To Date"
@@ -292,6 +307,7 @@ const AssignDistributor = () => {
                               touched: slotTouched,
                               errors: slotErrors,
                             }}
+                            className="col-12"
                           />
                         </Col>
                       </Row>
@@ -341,7 +357,7 @@ const AssignDistributor = () => {
           <Row className="mb-3">
             <Col>
               <CustomButton
-                buttonName="+ Add More Assignment"
+                className="btn btn-sm btn-grey px-2 py-1"
                 onClick={() =>
                   setFieldValue("slots", [
                     ...values.slots,
@@ -354,19 +370,25 @@ const AssignDistributor = () => {
                     },
                   ])
                 }
-              />
+              >
+                + Add More Assignment
+              </CustomButton>
             </Col>
           </Row>
 
           <Row justify="end" gutter={[8, 8]}>
             <Col>
               <CustomButton
-                buttonName=" Cancel"
+                className="btn btn-sm btn-error"
                 onClick={() => window.history.back()}
-              />
+              >
+                Cancel
+              </CustomButton>
             </Col>
             <Col>
-              <CustomButton type="submit" buttonName=" Submit Assignment" />
+              <CustomButton type="submit" className="btn btn-sm btn-submit">
+                Submit Assignment
+              </CustomButton>
             </Col>
           </Row>
         </form>
