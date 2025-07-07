@@ -3,13 +3,25 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { assignslotmap, customerdropdown } from "../../../Services/ApiService";
+import {
+  assignslotmap,
+  customerdropdown,
+} from "../../../Services/ApiService";
 import { useUserdata } from "../../../Hooks/UserHook";
 import CustomDropDown from "../../../Compontents/CustomDropDown";
 import CustomButton from "../../../Compontents/CoustomButton";
 import CustomDatePicker from "../../../Compontents/CustomDatePicker";
-import styles from "../../../Styles/Distributor.module.css";
-import { Select, Spin, Divider, Card, Row, Col } from "antd";
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  Divider,
+  FormHelperText,
+  CircularProgress,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 
 type SlotFormValues = {
   assign_type: string;
@@ -20,7 +32,7 @@ type SlotFormValues = {
 };
 
 type AssignDistributorFormValues = {
-  distributor_id: string; // ✅ fixed key
+  distributor_id: string;
   slot_id: string;
   slots: SlotFormValues[];
 };
@@ -31,7 +43,7 @@ interface CustomerOption {
 }
 
 const assignDistributorSchema = Yup.object().shape({
-  distributor_id: Yup.string().required("Distributor is required"), // ✅ fixed
+  distributor_id: Yup.string().required("Distributor is required"),
   slot_id: Yup.string().required("Slot is required"),
   slots: Yup.array().of(
     Yup.object().shape({
@@ -56,16 +68,12 @@ const assignDistributorSchema = Yup.object().shape({
 
 const AssignDistributor = () => {
   const token = useUserdata();
-  const [customers, setCustomers] = useState<Record<number, CustomerOption[]>>(
-    {}
-  );
-  const [loadingCustomers, setLoadingCustomers] = useState<
-    Record<number, boolean>
-  >({});
+  const [customers, setCustomers] = useState<Record<number, CustomerOption[]>>({});
+  const [loadingCustomers, setLoadingCustomers] = useState<Record<number, boolean>>({});
 
   const formik = useFormik<AssignDistributorFormValues>({
     initialValues: {
-      distributor_id: "", 
+      distributor_id: "",
       slot_id: "",
       slots: [
         {
@@ -102,7 +110,7 @@ const AssignDistributor = () => {
       return lineItem;
     });
 
-    const payload: any = {
+    const payload = {
       token,
       distributor_id: Number(values.distributor_id),
       slot_id: Number(values.slot_id),
@@ -117,8 +125,7 @@ const AssignDistributor = () => {
           toast.error(res.data.msg || "Failed to assign distributor.");
         }
       })
-      .catch((error) => {
-        console.error("API error:", error);
+      .catch(() => {
         toast.error("Something went wrong while assigning.");
       });
   };
@@ -186,22 +193,15 @@ const AssignDistributor = () => {
   };
 
   return (
-    <div className="container my-3">
-      <Card className="shadow-sm rounded">
-        <h3 className="mb-4 text-center">Assign Distributor Slot</h3>
+    <Box sx={{ p: 3 }}>
+      <Paper elevation={3} sx={{ p: 3,backgroundColor:"#E8F5E9" }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Assign Distributor Slot
+        </Typography>
 
         <form onSubmit={formik.handleSubmit}>
-          <Row gutter={[16, 16]} className="my-4">
-            <Col xs={24} md={12}>
-          <CustomDropDown
-          dropdownKeys={["distributor_id"]}
-          formik={formik}
-        />
-            </Col>
-            <Col xs={24} md={12}>
+              <CustomDropDown dropdownKeys={["distributor_id"]} formik={formik} />
               <CustomDropDown dropdownKeys={["slot_id"]} formik={formik} />
-            </Col>
-          </Row>
 
           {values.slots.map((slot, idx) => {
             const isTemporary = slot.assign_type === "0";
@@ -209,24 +209,8 @@ const AssignDistributor = () => {
             const slotTouched: any = touched.slots?.[idx] || {};
 
             return (
-              <Card key={idx} className={`${styles.assignmentCard} mb-4`}>
-                <Divider orientation="left">Assignment {idx + 1}</Divider>
-
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div className="fw-bold fs-5">Assignment Details</div>
-                  <CustomButton
-                    buttonName="Remove"
-                    disabled={values.slots.length === 1}
-                    onClick={() => {
-                      const updatedSlots = [...values.slots];
-                      updatedSlots.splice(idx, 1);
-                      setFieldValue("slots", updatedSlots);
-                    }}
-                  />
-                </div>
-
-                <Row gutter={[16, 16]}>
-                  <Col xs={24} md={12}>
+              <Paper key={idx} sx={{ p: 2, mb: 3,}} variant="outlined">
+                <Divider sx={{ mb: 2 }}>Assignment {idx + 1}</Divider>
                     <CustomDropDown
                       dropdownKeys={["assign_type"]}
                       formik={{
@@ -238,12 +222,9 @@ const AssignDistributor = () => {
                         errors: slotErrors,
                       }}
                     />
-                  </Col>
-                </Row>
-
                 {isTemporary && (
-                  <Row gutter={[16, 16]}>
-                    <Col xs={24} md={12}>
+                  <Grid container spacing={2} mb={1}>
+                    <Grid>
                       <CustomDatePicker
                         label="From Date"
                         value={slot.from_date}
@@ -257,8 +238,8 @@ const AssignDistributor = () => {
                         error={slotErrors.from_date}
                         touched={slotTouched.from_date}
                       />
-                    </Col>
-                    <Col xs={24} md={12}>
+                    </Grid>
+                    <Grid >
                       <CustomDatePicker
                         label="To Date"
                         value={slot.to_date}
@@ -272,16 +253,13 @@ const AssignDistributor = () => {
                         error={slotErrors.to_date}
                         touched={slotTouched.to_date}
                       />
-                    </Col>
-                  </Row>
+                    </Grid>
+                  </Grid>
                 )}
 
                 {slot.assign_type &&
-                  (!isTemporary ||
-                    (isTemporary && slot.from_date && slot.to_date)) && (
+                  (!isTemporary || (isTemporary && slot.from_date && slot.to_date)) && (
                     <>
-                      <Row gutter={[16, 16]}>
-                        <Col xs={24} md={12}>
                           <CustomDropDown
                             dropdownKeys={["line_id"]}
                             formik={{
@@ -293,85 +271,77 @@ const AssignDistributor = () => {
                               errors: slotErrors,
                             }}
                           />
-                        </Col>
-                      </Row>
 
-                      <Row gutter={[16, 16]}>
-                        <Col xs={24} md={12}>
-                          <label>Customers</label>
-                          <Spin spinning={loadingCustomers[idx]}>
-                            <Select
-                              mode="multiple"
-                              allowClear
-                              placeholder="Select customers"
-                              style={{ width: "100%" }}
-                              disabled={!slot.line_id || !slot.assign_type}
-                              value={slot.customers}
-                              onChange={(val) => {
-                                const cleaned = (val || []).filter(
-                                  (v) => v !== undefined && v !== "undefined"
-                                );
-                                setFieldValue(
-                                  `slots[${idx}].customers`,
-                                  cleaned
-                                );
-                              }}
-                              onBlur={handleBlur}
-                              options={customers[idx] || []}
-                              className={`${
-                                slotErrors.customers && slotTouched.customers
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                            />
-                          </Spin>
-                          {slotErrors.customers && slotTouched.customers && (
-                            <div className="text-danger">
-                              {slotErrors.customers}
-                            </div>
-                          )}
-                        </Col>
-                      </Row>
+                        <Grid >
+                          <TextField
+                            label="Customers"
+                            select
+                            fullWidth
+                            value={slot.customers}
+                            onChange={(e) =>
+                              setFieldValue(
+                                `slots[${idx}].customers`,
+                                e.target.value.filter((v: any) => v !== "undefined")
+                              )
+                            }
+                            onBlur={handleBlur}
+                            error={Boolean(slotErrors.customers && slotTouched.customers)}
+                            helperText={
+                              slotErrors.customers && slotTouched.customers
+                                ? slotErrors.customers
+                                : ""
+                            }
+                            disabled={!slot.line_id || !slot.assign_type}
+                          >
+                            {loadingCustomers[idx] ? (
+                              <MenuItem disabled>
+                                <CircularProgress size={20} />
+                              </MenuItem>
+                            ) : (
+                              customers[idx]?.map((opt) => (
+                                <MenuItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </MenuItem>
+                              ))
+                            )}
+                          </TextField>
+                        </Grid>
                     </>
                   )}
-              </Card>
+              </Paper>
             );
           })}
 
-          <Row className="mb-3">
-            <Col>
-              <CustomButton
-                buttonName="+ Add More Assignment"
-                onClick={() =>
-                  setFieldValue("slots", [
-                    ...values.slots,
-                    {
-                      assign_type: "",
-                      line_id: "",
-                      from_date: "",
-                      to_date: "",
-                      customers: [],
-                    },
-                  ])
-                }
-              />
-            </Col>
-          </Row>
+          <Box mb={2}>
+            <CustomButton
+              sx={{backgroundColor:"#4EB24E"}}
+              buttonName="+ Add More Assignment"
+              onClick={() =>
+                setFieldValue("slots", [
+                  ...values.slots,
+                  {
+                    assign_type: "",
+                    line_id: "",
+                    from_date: "",
+                    to_date: "",
+                    customers: [],
+                  },
+                ])
+              }
+            />
+          </Box>
 
-          <Row justify="end" gutter={[8, 8]}>
-            <Col>
-              <CustomButton
-                buttonName=" Cancel"
-                onClick={() => window.history.back()}
-              />
-            </Col>
-            <Col>
-              <CustomButton type="submit" buttonName=" Submit Assignment" />
-            </Col>
-          </Row>
+          <Grid container spacing={2} justifyContent="flex-end">
+            <Grid>
+              <CustomButton buttonName="Cancel" sx={{backgroundColor:"#4EB24E"}} onClick={() => window.history.back()} />
+            </Grid>
+            <Grid>
+              <CustomButton sx={{backgroundColor:"#4EB24E"}} type="submit" buttonName="Submit Assignment" />
+            </Grid>
+          </Grid>
         </form>
-      </Card>
-    </div>
+      </Paper>
+    </Box>
   );
 };
 
