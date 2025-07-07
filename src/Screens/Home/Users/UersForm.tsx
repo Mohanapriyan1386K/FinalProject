@@ -42,7 +42,7 @@ interface FormValues {
   alternative_number: string;
   password: string;
   user_type: string;
-  customer_type: string;
+  customer_type: any;
   line_id: string;
   price_tag_id: string;
   pay_type: string;
@@ -116,9 +116,8 @@ const CreateUser = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const id = location.state?.id;
+  const usertype=location.state?.user_type;
   const isEdit = !!id;
-
-  console.log(id);
   const [linesList, setLinesList] = useState<Line[]>([]);
   const [priceTagList, setPriceTagList] = useState<PriceTag[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +156,7 @@ const CreateUser = () => {
       phone: "",
       alternative_number: "",
       password: "",
-      user_type: "",
+      user_type: usertype ? usertype.toString() : "2",
       customer_type: "",
       line_id: "",
       price_tag_id: "",
@@ -359,7 +358,7 @@ const CreateUser = () => {
         <Paper sx={{backgroundColor:"#E8F5E9", padding:2,fontSize:"25px",fontWeight:"700"}}>
           <Box sx={{display:"flex",justifyContent:"space-between"}}>
              {isEdit?"EDIT USER":"ADD USER"}
-             <CustomButton buttonName="Back" sx={{backgroundColor:"green"}} onClick={()=>{navigate}} />
+             <CustomButton buttonName="Back" sx={{backgroundColor:"green"}} onClick={()=>{navigate(-1)}} />
           </Box>
         </Paper>
       
@@ -484,7 +483,7 @@ const CreateUser = () => {
                   <Option value="2">Occasional</Option>
                 </Select>
                 {errors.customer_type && (
-                  <div className="text-danger">{errors.customer_type}</div>
+                  <div className="text-danger">{errors.customer_type.toString()}</div>
                 )}
               </div>
               <div className="col-md-4 mb-3">

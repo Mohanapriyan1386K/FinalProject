@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Calendar, theme } from "antd";
+import CustomCalendar from "../../../Compontents/CustomCalendar";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { Box, Paper, Typography } from "@mui/material";
@@ -8,21 +8,24 @@ import {
   routgetdistributed,
   disributedmilkgivenstaus,
 } from "../../../Services/ApiService";
-import { useUserdata, useUserid } from "../../../Hooks/UserHook";
+import { useUserdata, useUserid,useCurrentdate } from "../../../Hooks/UserHook";
 import CustomButton from "../../../Compontents/CoustomButton";
+import Loader from "../../../Compontents/Loader";
+
 
 const App: React.FC = () => {
   const Token = useUserdata();
   const userId = useUserid();
+  const currentdate=useCurrentdate();
 
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [dailyReportData, setDailyReportData] = useState<any[]>([]);
   const [remainingQuantity, setRemainingQuantity] = useState<number>(0);
   const [distributorroute, setdisributorroute] = useState<any[]>([]);
   const [slot_id, setslotid] = useState<any>();
-  const [slot_id_cancel, set_slot_id_cancel] = useState<any>();
   const [alluser, getallusers] = useState<any[]>([]);
   const [canceluser, setcanceluser] = useState<any[]>([]);
+  const [loading,setLoading]=useState(false)
 
   const statusMap: Record<number, { text: string; color: string }> = {
     1: { text: "Given", color: "green" },
@@ -36,25 +39,25 @@ const App: React.FC = () => {
     2: "Evening",
   };
 
-  const disabledDate = (current: Dayjs) => current > dayjs().endOf("day");
 
   useEffect(() => {
     if (Token) {
       getusers(selectedDate);
     }
-  }, [slot_id]);
+  }, [slot_id,selectedDate]);
 
   useEffect(() => {
     if (Token) {
       getcanceluser(selectedDate);
     }
-  }, [slot_id_cancel]);
+  }, [slot_id]);
 
   useEffect(() => {
     fetchReportData(selectedDate);
-  }, []);
+  }, [selectedDate]);
 
   const fetchRouteData = (formattedDate: string) => {
+    
     const routePayload = new FormData();
     routePayload.append("token", Token);
     routePayload.append("type", "2");
@@ -63,29 +66,36 @@ const App: React.FC = () => {
 
     routgetdistributed(routePayload)
       .then((res) => {
+        setLoading(true)
         setdisributorroute(res.data.data);
       })
       .catch(() => {
         setdisributorroute([]);
-      });
+      }).finally(()=>{
+        setLoading(false)
+      })
   };
 
   const getusers = (date: Dayjs) => {
-    const formattedDate = date.format("YYYY-MM-DD");
+    // const formattedDate = date.format("YYYY-MM-DD");
     const payload = new FormData();
     payload.append("token", Token);
     payload.append("distributor_id", userId);
     if (slot_id) payload.append("slot_id", slot_id);
-    payload.append("from_date", formattedDate);
+    payload.append("from_date", currentdate);
+    payload.append("to_date",currentdate)
     payload.append("status", "1,2,3");
 
     disributedmilkgivenstaus(payload)
       .then((res) => {
         getallusers(res.data.data || []);
+        setLoading(true)
       })
       .catch(() => {
         getallusers([]);
-      });
+      }).finally(()=>{
+         setLoading(false)
+      })
   };
 
   const getcanceluser = (date: Dayjs) => {
@@ -93,17 +103,20 @@ const App: React.FC = () => {
     const payload = new FormData();
     payload.append("token", Token);
     payload.append("distributor_id", userId);
-    if (slot_id_cancel) payload.append("slot_id", slot_id_cancel);
+    if (slot_id) payload.append("slot_id", slot_id);
     payload.append("from_date", formattedDate);
     payload.append("status", "4");
 
     disributedmilkgivenstaus(payload)
       .then((res) => {
+         setLoading(true)
         setcanceluser(res.data.data || []);
       })
       .catch(() => {
         setcanceluser([]);
-      });
+      }).finally(()=>{
+         setLoading(false)
+      })
   };
 
   const fetchReportData = (date: Dayjs) => {
@@ -145,24 +158,37 @@ const App: React.FC = () => {
     getusers(date);
   };
 
-  return (
+
+
+  return loading ? (
+  <Box sx={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <Loader />
+  </Box>):(
     <Box sx={{ width: "100%", padding: 3 }}>
-      <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 3 }}>
-        <Paper elevation={5} sx={{ padding: 2, backgroundColor: "#E8F5E9", borderRadius: 2 }}>
+      <Box
+        sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 3 }}
+      >
+        <Paper
+          elevation={5}
+          sx={{ padding: 2, backgroundColor: "#E8F5E9", borderRadius: 2 }}
+        >
           <Typography variant="h6" fontWeight={600}>
             DAILY INVENTORY REPORT
           </Typography>
         </Paper>
 
         {/* Calendar and Inventory Cards */}
-        <Box display="flex" flexWrap="wrap" gap={2} justifyContent="space-between">
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          gap={2}
+          justifyContent="space-between"
+        >
           <Box sx={{ flex: "1 1 300px", minWidth: "300px" }}>
-            <Calendar
-              fullscreen={false}
-              onSelect={fetchReportData}
-              disabledDate={disabledDate}
-              value={selectedDate}
-              className="custom-calendar"
+            <CustomCalendar
+              fetchReportData={(date) => console.log(date.format("YYYY-MM-DD"))}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
             />
           </Box>
 
@@ -184,7 +210,8 @@ const App: React.FC = () => {
             </Typography>
 
             {dailyReportData.map((item, idx) => {
-              const slotLabel = slotNames[item.slot_id] || `Slot ${item.slot_id}`;
+              const slotLabel =
+                slotNames[item.slot_id] || `Slot ${item.slot_id}`;
               return (
                 <Paper
                   key={idx}
@@ -196,10 +223,18 @@ const App: React.FC = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Typography variant="subtitle1" fontWeight={600}>{slotLabel}</Typography>
-                  <Typography variant="body2"><strong>Total Quantity:</strong> {item.total_quantity}</Typography>
-                  <Typography variant="body2"><strong>Given Quantity:</strong> {item.given_quantity}</Typography>
-                  <Typography variant="body2"><strong>Remaining Quantity:</strong> {remainingQuantity}</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {slotLabel}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Total Quantity:</strong> {item.total_quantity}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Given Quantity:</strong> {item.given_quantity}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Remaining Quantity:</strong> {remainingQuantity}
+                  </Typography>
                 </Paper>
               );
             })}
@@ -209,7 +244,9 @@ const App: React.FC = () => {
         {/* Assigned Routes */}
         {Array.isArray(distributorroute) && (
           <Paper sx={{ backgroundColor: "#E8F5E9", padding: 2 }}>
-            <Typography variant="h6" fontWeight={600}>Assigned Routes</Typography>
+            <Typography variant="h6" fontWeight={600}>
+              Assigned Routes
+            </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
               {distributorroute.map((route: any, index: number) => (
                 <Paper
@@ -236,35 +273,88 @@ const App: React.FC = () => {
         {/* Delivered Users */}
         <Paper sx={{ padding: 2 }}>
           <Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
-              <Typography variant="h6" fontWeight={600}>Customer Milk Delivery Status</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                sx={{
+                  color:
+                    slot_id === 1
+                      ? "#66BB6A"
+                      : slot_id === 2
+                      ? "#42A5F5"
+                      : "#FF0000",
+                }}
+              >
+                {`Customer Milk Delivery Status ${
+                  slot_id === 1 ? "Morning" : slot_id === 2 ? "Evening" : "All"
+                }`}
+              </Typography>
+
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <CustomButton buttonName="All" onClick={() => setslotid("")} sx={{ backgroundColor: "red" }} />
-                <CustomButton buttonName="MORNING" onClick={() => setslotid(1)} sx={{ backgroundColor: "#4CAF50" }} />
-                <CustomButton buttonName="EVENING" onClick={() => setslotid(2)} />
+                <CustomButton
+                  buttonName="All"
+                  onClick={() => setslotid("")}
+                  sx={{ backgroundColor: "red" }}
+                />
+                <CustomButton
+                  buttonName="MORNING"
+                  onClick={() => setslotid(1)}
+                  sx={{ backgroundColor: "#4CAF50" }}
+                />
+                <CustomButton
+                  buttonName="EVENING"
+                  onClick={() => setslotid(2)}
+                />
               </Box>
             </Box>
 
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 2, mt: 2 }}>
-              {alluser.length > 0 ? alluser.map((user: any, idx: number) => {
-                const slotLabel = slotNames[user.slot_id] || `Slot ${user.slot_id}`;
-                return (
-                  <Paper
-                    key={user.slot_log_id || idx}
-                    elevation={3}
-                    sx={{
-                      padding: 2,
-                      backgroundColor: "#fffde7",
-                      borderLeft: `6px solid ${user.status === 4 ? "#f44336" : "#4caf50"}`,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight={600}>{user.customer_name}</Typography>
-                    <Typography variant="body2"><strong>Milk Given:</strong> {user.milk_given_quantity} L</Typography>
-                    <Typography variant="body2"><strong>Given status:</strong>{user.milk_given_status}</Typography>
-                  </Paper>
-                );
-              }) : (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {alluser.length > 0 ? (
+                alluser.map((user: any, idx: number) => {
+                  return (
+                    <Paper
+                      key={user.slot_log_id || idx}
+                      elevation={3}
+                      sx={{
+                        padding: 2,
+                        backgroundColor: "#fffde7",
+                        borderLeft: `6px solid ${
+                          user.status === 4 ? "#f44336" : "#4caf50"
+                        }`,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {user.customer_name}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Milk Given:</strong> {user.milk_given_quantity}{" "}
+                        L
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Given status:</strong>
+                        {user.milk_given_status}
+                      </Typography>
+                    </Paper>
+                  );
+                })
+              ) : (
                 <Typography sx={{ color: "gray", fontStyle: "italic" }}>
                   No customer data found for the selected slot.
                 </Typography>
@@ -276,38 +366,68 @@ const App: React.FC = () => {
         {/* Cancelled Users */}
         <Paper sx={{ padding: 2 }}>
           <Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
-              <Typography variant="h6" fontWeight={600}>Cancelled Users</Typography>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <CustomButton buttonName="All" onClick={() => set_slot_id_cancel("")} sx={{ backgroundColor: "red" }} />
-                <CustomButton buttonName="MORNING" onClick={() => set_slot_id_cancel(1)} sx={{ backgroundColor: "#4CAF50" }} />
-                <CustomButton buttonName="EVENING" onClick={() => set_slot_id_cancel(2)} />
-              </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
+              <Typography variant="h6" fontWeight={600}>
+                Cancelled Users
+              </Typography>
             </Box>
 
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 2, mt: 2 }}>
-              {canceluser.length > 0 ? canceluser.map((user: any, idx: number) => {
-                const slotLabel = slotNames[user.slot_id] || `Slot ${user.slot_id}`;
-                return (
-                  <Paper
-                    key={user.slot_log_id || idx}
-                    elevation={3}
-                    sx={{
-                      padding: 2,
-                      backgroundColor: "#fffde7",
-                      borderLeft: `6px solid ${user.status === 4 ? "#f44336" : "#4caf50"}`,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight={600}>{user.customer_name}</Typography>
-                    <Typography variant="body2"><strong>Slot:</strong> {slotLabel}</Typography>
-                    <Typography variant="body2"><strong>Milk Given:</strong> {user.milk_given_quantity} L</Typography>
-                    <Typography variant="body2" sx={{ color: statusMap[user.status]?.color, fontWeight: 600 }}>
-                      Status: {statusMap[user.status]?.text || "Unknown"}
-                    </Typography>
-                  </Paper>
-                );
-              }) : (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {canceluser.length > 0 ? (
+                canceluser.map((user: any, idx: number) => {
+                  const slotLabel =
+                    slotNames[user.slot_id] || `Slot ${user.slot_id}`;
+                  return (
+                    <Paper
+                      key={user.slot_log_id || idx}
+                      elevation={3}
+                      sx={{
+                        padding: 2,
+                        backgroundColor: "#fffde7",
+                        borderLeft: `6px solid ${
+                          user.status === 4 ? "#f44336" : "#4caf50"
+                        }`,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {user.customer_name}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Slot:</strong> {slotLabel}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Milk Given:</strong> {user.milk_given_quantity}{" "}
+                        L
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: statusMap[user.status]?.color,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Status: {statusMap[user.status]?.text || "Unknown"}
+                      </Typography>
+                    </Paper>
+                  );
+                })
+              ) : (
                 <Typography sx={{ color: "gray", fontStyle: "italic" }}>
                   No customer data found for the selected slot.
                 </Typography>

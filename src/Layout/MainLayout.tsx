@@ -9,7 +9,7 @@ const MainLayout = () => {
   if (!userType) return <Box>Loading layout...</Box>;
 
   return (
-    <Box display="flex" minHeight="100vh" gap={2}>
+    <Box display="flex" minHeight="100vh">
       <CssBaseline />
       {userType == 1 && (
         <>

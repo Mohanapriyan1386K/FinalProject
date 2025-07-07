@@ -12,58 +12,187 @@ import {
   Divider,
   IconButton,
   useMediaQuery,
+  Collapse,
 } from "@mui/material";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import MenuIcon from "@mui/icons-material/Menu";
-import { useState } from "react";
+import {
+  GroupAdd,
+  LocalShipping,
+  DashboardCustomize,
+  MenuOpen,
+  Settings,
+  Menu,
+  ExpandLess,
+  ExpandMore,
+  ChevronRight} from "@mui/icons-material";
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { useState, type ReactNode } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 import { useUsertype } from "../Hooks/UserHook";
 import { useTheme } from "@mui/material/styles";
 
-const menuItems = [
+interface MenuItemType {
+  text: string;
+  to?: string;
+  icon?: ReactNode;
+  allowedUserTypes: number[];
+  children?: MenuItemType[];
+}
+
+const menuItems: MenuItemType[] = [
   {
     text: "User",
     to: "/dashboard",
-    icon: <GroupAddIcon />,
+    icon: <GroupAdd />,
     allowedUserTypes: [1],
+  },
+  {
+    text: "Master",
+    icon: <Settings />,
+    allowedUserTypes: [1],
+    children: [
+      {
+        text: "Slot",
+        to: "/dashboard/Slot",
+        icon: <ChevronRight />,
+        allowedUserTypes: [1],
+      },
+      {
+        text: "Line",
+        to: "/dashboard/Lines",
+        icon: <ChevronRight />,
+        allowedUserTypes: [1],
+      },
+      {
+        text: "Price Tag",
+        to: "/dashboard/Pricetag",
+        icon: <ChevronRight />,
+        allowedUserTypes: [1],
+      },
+       {
+        text: "Reason",
+        to: "/dashboard/Reason",
+        icon: <ChevronRight />,
+        allowedUserTypes: [1],
+      },
+    ],
   },
   {
     text: "Inventory",
     to: "/dashboard/inventory",
-    icon: <DashboardCustomizeIcon />,
+    icon: <DashboardCustomize />,
     allowedUserTypes: [1],
   },
   {
     text: "Distributed",
     to: "/dashboard/distributedList",
-    icon: <LocalShippingIcon />,
+    icon: <LocalShipping />,
     allowedUserTypes: [1],
   },
   {
+    text:"Place order",
+    to:"/dashboard/PlaceOrder",
+    icon:<AddShoppingCartIcon/>,
+    allowedUserTypes:[1]
+  },
+
+  // distribtoir
+  {
     text: "Users",
     to: "/distributor",
-    icon: <GroupAddIcon />,
+    icon: <GroupAdd />,
     allowedUserTypes: [4],
   },
+  
 ];
 
-const Sidebar = () => {
+const commonListItemStyle = (collapsed: boolean) => ({
+  color: "#1B5E20",
+  borderRadius: 1,
+  justifyContent: collapsed ? "center" : "flex-start",
+  "&:hover": {
+    backgroundColor: "#c8e6c9",
+  },
+});
+
+const commonIconStyle = (collapsed: boolean) => ({
+  color: "#1B5E20",
+  minWidth: collapsed ? "auto" : "20px",
+  mr: collapsed ? 0 : 1,
+});
+
+interface NestedMenuProps {
+  item: MenuItemType;
+  collapsed: boolean;
+  isMobile: boolean;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  usertype: number;
+}
+
+const NestedMenuItem: React.FC<NestedMenuProps> = ({
+  item,
+  collapsed,
+  isMobile,
+  setMobileOpen,
+  usertype,
+}) => {
+  const [open, setOpen] = useState(true);
+  const handleClick = () => setOpen((prev) => !prev);
+
+  return (
+    <>
+      <ListItem onClick={handleClick} sx={commonListItemStyle(collapsed)}>
+        <ListItemIcon sx={commonIconStyle(collapsed)}>
+          {item.icon}
+        </ListItemIcon>
+        {!collapsed && (
+          <>
+            <ListItemText primary={item.text} />
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </>
+        )}
+      </ListItem>
+
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {item.children
+            ?.filter((child) => child.allowedUserTypes.includes(usertype))
+            .map((child) => (
+              <ListItem
+                key={child.text}
+                component={NavLink}
+                to={child.to}
+                onClick={() => isMobile && setMobileOpen(false)}
+                sx={{
+                  ...commonListItemStyle(collapsed),
+                  pl: collapsed ? 2 : 4,
+                }}
+              >
+                <ListItemIcon sx={commonIconStyle(collapsed)}>
+                  {child.icon || <ChevronRight />}
+                </ListItemIcon>
+                {!collapsed && <ListItemText primary={child.text} />}
+              </ListItem>
+            ))}
+        </List>
+      </Collapse>
+    </>
+  );
+};
+
+const Sidebar: React.FC = () => {
   const usertype = useUsertype();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const drawerWidth = collapsed ? 80 : 200;
+  const drawerWidth = collapsed ? 80 :200;
 
   const toggleSidebar = () => {
     if (isMobile) {
-      setMobileOpen(!mobileOpen);
+      setMobileOpen((prev) => !prev);
     } else {
       setCollapsed((prev) => !prev);
     }
@@ -71,24 +200,22 @@ const Sidebar = () => {
 
   const drawerContent = (
     <>
-      <Toolbar sx={{ justifyContent: collapsed ? "center" : "space-around" }}>
-        <Box display="flex" alignItems="center">
-          {!collapsed && (
-            <Typography
-              variant="h6"
-              sx={{
-                color: "#2e7d32",
-                fontWeight: "bold",
-                ml: 1,
-                fontSize: "15px",
-              }}
-            >
-              MilkPro Sales
-            </Typography>
-          )}
-        </Box>
+      <Toolbar sx={{ justifyContent: collapsed ? "center" : "space-between" }}>
+        {!collapsed && (
+          <Typography
+            variant="h6"
+            sx={{
+              color: "#2e7d32",
+              fontWeight: "bold",
+              ml: 1,
+              fontSize: "15px",
+            }}
+          >
+            MilkPro Sales
+          </Typography>
+        )}
         <IconButton onClick={toggleSidebar}>
-          {collapsed ? <MenuIcon sx={{ color: "green" }} /> : <MenuOpenIcon />}
+          {collapsed ? <Menu sx={{ color: "green" }} /> : <MenuOpen />}
         </IconButton>
       </Toolbar>
 
@@ -98,53 +225,43 @@ const Sidebar = () => {
         <List>
           {menuItems
             .filter((item) => item.allowedUserTypes.includes(usertype))
-            .map((item) => (
-              <ListItem
-                key={item.text}
-                component={NavLink}
-                to={item.to}
-                onClick={() => isMobile && setMobileOpen(false)}
-                sx={{
-                  color: "#1B5E20",
-                  "&:hover": { backgroundColor: "#c8e6c9" },
-                  borderRadius: 1,
-                  justifyContent: collapsed ? "center" : "flex-start",
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: "#1B5E20",
-                    minWidth: collapsed ? "auto" : "40px",
-                    mr: collapsed ? 0 : 1,
-                  }}
+            .map((item) =>
+              item.children ? (
+                <NestedMenuItem
+                  key={item.text}
+                  item={item}
+                  collapsed={collapsed}
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                  usertype={usertype}
+                />
+              ) : (
+                <ListItem
+                  key={item.text}
+                  component={NavLink}
+                  to={item.to}
+                  onClick={() => isMobile && setMobileOpen(false)}
+                  sx={commonListItemStyle(collapsed)}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                {!collapsed && <ListItemText primary={item.text} />}
-              </ListItem>
-            ))}
+                  <ListItemIcon sx={commonIconStyle(collapsed)}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText primary={item.text} />}
+                </ListItem>
+              )
+            )}
         </List>
 
         <List>
           <ListItem
             onClick={() => setIsModalOpen(true)}
             sx={{
-              borderRadius: 2,
+              ...commonListItemStyle(collapsed),
               mb: 1,
-              cursor: "pointer",
-              justifyContent: collapsed ? "center" : "flex-start",
-              "&:hover": {
-                backgroundColor: "#c8e6c9",
-              },
+              color: "red",
             }}
           >
-            <ListItemIcon
-              sx={{
-                color: "red",
-                minWidth: collapsed ? "auto" : "40px",
-                mr: collapsed ? 0 : 1,
-              }}
-            >
+            <ListItemIcon sx={commonIconStyle(collapsed)}>
               <img src={assets.LogoutIcon} width={25} alt="Logout" />
             </ListItemIcon>
             {!collapsed && (
@@ -160,13 +277,12 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Hamburger button for mobile */}
       {isMobile && (
         <IconButton
           onClick={toggleSidebar}
           sx={{ position: "fixed", top: 10, left: 10, zIndex: 1300 }}
         >
-          <MenuIcon sx={{ color: "#2e7d32" }} />
+          <Menu sx={{ color: "#2e7d32" }} />
         </IconButton>
       )}
 

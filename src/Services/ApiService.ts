@@ -199,3 +199,84 @@ export const routgetdistributed=(payload:any)=>{
 export const disributedmilkgivenstaus=(payload:any)=>{
    return axiosInstance.post("/milk-api/milk-sales/list-slot-mapping",payload)
 }
+
+
+
+// Master
+
+// slot
+
+export const slotMaster=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/list-slot",payload)
+}
+
+export const slotUapdateMaster=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/update-slot",payload)
+}
+// line
+export const masterLineList=(payload:any)=>{
+   return axiosInstance.post("/milk-api/masters/list-lines",payload)
+}
+
+export const masterLineListDelete=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/delete-lines",payload)
+} 
+
+export const  masterLineListUpadate=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/update-lines",payload)
+}
+export const masterLineStautus=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/inactive-lines",payload)
+}
+
+export const masterLineAdd=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/create-lines",payload)
+}
+
+
+// price tag
+
+export const masterpricetageList=(payload:any,page:number,size:number)=>{
+  return axiosInstance.post(`/milk-api/masters/list-price-tag?page=${page}&size=${size}`,payload)
+}
+export const masterpricetageCreate=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/create-price-tag",payload)
+}
+export const masterpricetageUpdate=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/update-price-tag",payload)
+}
+export const masterpricetageDelete=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/delete-price-tag",payload)
+}
+export const masterpricetageActive=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/inactive-price-tag",payload)
+}
+
+// Reason
+export const masterReasonList=(payload:any)=>{
+   return axiosInstance.post("/milk-api/masters/list-reason",payload)
+} 
+
+export const masterReasonCreate=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/create-reason",payload)
+}
+
+export const masterReasonUpdate=(payload:any)=>{
+       return axiosInstance.post("/milk-api/masters/update-reason",payload)
+}
+
+export const masterReasonDelete=(payload:any)=>{
+     return axiosInstance.post("/milk-api/masters/delete-reason",payload)
+}
+
+export const masterReasonStatus=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/inactive-reason",payload)
+}
+
+export const directcoustomerlog=(payload:any)=>{
+  return axiosInstance.post("/milk-api/milk-sales/direct-customer-log",payload)
+}
+
+export const getactiveslot=(payload:any)=>{
+  return axiosInstance.post("/milk-api/masters/get-active-slot",payload)
+}
