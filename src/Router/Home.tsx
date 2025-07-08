@@ -14,6 +14,7 @@ import Line from "../Screens/Masters/Line";
 import Pricetag from "../Screens/Masters/Pricetag";
 import Reason from "../Screens/Masters/Reason";
 import Placeorder from "../Screens/Home/PlaceOrder/Placeorder";
+import Saleslog from "../Screens/Home/Saleslog/Saleslog";
 
 
 export const AdminRouter: RouteObject[] = [
@@ -33,7 +34,8 @@ export const AdminRouter: RouteObject[] = [
       {path:"Lines",element:<Line/>},
       {path:"Pricetag",element:<Pricetag/>},
       {path:"Reason",element:<Reason/>},
-      {path:"PlaceOrder",element:<Placeorder/>}
+      {path:"PlaceOrder",element:<Placeorder/>},
+      {path:"saleslog",element:<Saleslog/>}
     ],
   }
 ];

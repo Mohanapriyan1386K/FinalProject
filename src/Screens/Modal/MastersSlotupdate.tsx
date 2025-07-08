@@ -41,15 +41,6 @@ const MastersSlotupdate = ({ isOpen, onClose, formik }: SlotModalProps) => {
     >
       <div ref={formRef}>
         <AntForm layout="vertical">
-          <AntForm.Item label="Slot">
-            <InputNumber
-              name="slot_id"
-              value={formik.values.slot_id}
-              onChange={(value) => formik.setFieldValue("slot_id", value)}
-              style={{ width: "100%" }}
-            />
-          </AntForm.Item>
-
           <AntForm.Item
             label="Name"
             validateStatus={formik.errors.name ? "error" : ""}

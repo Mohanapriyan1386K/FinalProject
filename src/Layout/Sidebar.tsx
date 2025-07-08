@@ -25,6 +25,7 @@ import {
   ExpandMore,
   ChevronRight} from "@mui/icons-material";
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import RealEstateAgentIcon from '@mui/icons-material/RealEstateAgent';
 import { useState, type ReactNode } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 import { useUsertype } from "../Hooks/UserHook";
@@ -75,6 +76,13 @@ const menuItems: MenuItemType[] = [
         allowedUserTypes: [1],
       },
     ],
+  },
+
+  {
+   text:"Sales Log",
+   to: "/dashboard/saleslog",
+   allowedUserTypes: [1],
+   icon:<RealEstateAgentIcon/>,
   },
   {
     text: "Inventory",

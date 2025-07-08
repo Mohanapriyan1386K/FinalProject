@@ -39,17 +39,6 @@ const CustomForm = ({ formik, isOpen, onClose }: CustomFormProps) => {
         
 
         <AntForm layout="vertical">
-           <AntForm.Item label="LineID" required>
-            <Input
-              name="lines_id"
-              value={formik.values.lines_id}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              status={formik.touched.name && formik.errors.name ? "error" : ""}
-              placeholder="Enter name"
-            />
-          </AntForm.Item>
-
           <AntForm.Item label="Name" required>
             <Input
               name="name"

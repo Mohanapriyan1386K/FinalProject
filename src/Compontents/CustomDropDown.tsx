@@ -17,7 +17,7 @@ interface ReusableDropdownsProps {
   formik: any;
 }
 
-// Static options
+// Static dropdown options
 const UserDropDown = [
   { label: "Admin", value: "2" },
   { label: "Vendor/logger", value: "3" },
@@ -147,12 +147,15 @@ const CustomDropDown: React.FC<ReusableDropdownsProps> = ({
     <div className="col-md-4 mb-3" key={name}>
       <label>{placeholder}</label>
       <Select
+        style={{width:"500px"}}
         mode={name === "customer_id" ? "multiple" : undefined}
         allowClear
         className={`w-100 ${errors[name] && touched[name] ? "is-invalid" : ""}`}
         value={values[name] ?? (name === "customer_id" ? [] : undefined)}
         placeholder={`Select ${placeholder.toLowerCase()}`}
-        onChange={(val) => setFieldValue(name, val ?? (name === "customer_id" ? [] : ""))}
+        onChange={(val) =>
+          setFieldValue(name, val ?? (name === "customer_id" ? [] : ""))
+        }
         onBlur={() => handleBlur({ target: { name } })}
       >
         {options.map((opt) => (

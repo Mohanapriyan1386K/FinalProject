@@ -280,3 +280,9 @@ export const directcoustomerlog=(payload:any)=>{
 export const getactiveslot=(payload:any)=>{
   return axiosInstance.post("/milk-api/masters/get-active-slot",payload)
 }
+
+// List distbuted log
+export const listdistbutedlog=(payload:any)=>{
+  return axiosInstance.post("/milk-api/milk-sales/list-distributor-log",payload)
+}
+

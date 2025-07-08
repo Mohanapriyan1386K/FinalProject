@@ -13,6 +13,7 @@ import { setEncryptedCookie } from "../../Uitils/Cookeis";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { saltkey } from "../../../public/config";
+import 'react-toastify/dist/ReactToastify.css'; // ✅ Required for toast styling
 
 // Yup validation schema
 const validationSchema = Yup.object({
@@ -25,17 +26,14 @@ function Logins() {
   const userType = useUsertype();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (token && (userType === 1)) {
+    if (token && userType === 1) {
       navigate("/dashboard");
-    }
-    else if(token &&(userType===4)){
-      navigate("/distributor")
+    } else if (token && userType === 4) {
+      navigate("/distributor");
     }
   }, [token, userType, navigate]);
 
-  // Login handler
   const handleLogin = (values: { user_name: string; password: string }) => {
     const formdatas = new FormData();
     formdatas.append("user_name", values.user_name);
@@ -45,38 +43,48 @@ function Logins() {
 
     logindata(formdatas)
       .then((res) => {
-        if (res && res.data?.token) {
+        const data = res?.data;
+        console.log("Login response:", data);
+
+        if (!data) {
+          toast.error("Unexpected response from server");
+          return;
+        }
+
+        if (data.status === 0) {
+          toast.error(data.msg || "Login failed");
+        } else if (data.status === 1) {
           const userData = {
-            token: res.data.token,
-            user_id: res.data.user_id,
-            user_name: res.data.user_name,
-            user_type: res.data.user_type,
-            is_daily: res.data.is_daily,
-            is_occasional: res.data.is_occasional,
+            token: data.token,
+            user_id: data.user_id,
+            user_name: data.user_name,
+            user_type: data.user_type,
+            is_daily: data.is_daily,
+            is_occasional: data.is_occasional,
           };
 
-          // Save encrypted cookie
           setEncryptedCookie("user_token", userData);
-          Cookies.set("user_type", res.data.user_type.toString());
+          Cookies.set("user_type", data.user_type.toString());
 
-          toast.success("Login successful!");
+          toast.success("Login successful");
 
-          // Navigate immediately using returned user_type
-          if (res.data.user_type === 1) {
-            navigate("/dashboard");
-          }
-          else if(res.data.user_type===4){
-             navigate("/distributor")
-          }
-          else {
-            toast.error("Unauthorized user type");
-          }
+          setTimeout(() => {
+            if (data.user_type === 1) {
+              navigate("/dashboard");
+            } else if (data.user_type === 4) {
+              navigate("/distributor");
+            }
+          }, 500);
+        } else if (data.status === 2) {
+          setEncryptedCookie("reset_key", data.reset_key);
+          toast.success("OTP sent successfully");
+          setTimeout(() => navigate("/verify-otp"), 500);
         } else {
-          toast.error("Invalid credentials or missing token");
+          toast.error("Unhandled server response");
         }
       })
       .catch((error) => {
-        console.error("Login error", error.response?.data || error.message);
+        console.error("Login error", error?.response?.data || error.message);
         toast.error("Login failed. Please try again");
       });
   };
@@ -105,7 +113,8 @@ function Logins() {
         backgroundSize: "cover",
       }}
     >
-      <ToastContainer />
+      <ToastContainer /> {/* ✅ ToastContainer included */}
+
       <Box
         padding={2}
         display="flex"
@@ -127,11 +136,21 @@ function Logins() {
           style={{ width: 150, marginBottom: 10 }}
         />
 
-        <Typography fontSize={26} fontWeight="bold" color="#4CAF50" textAlign="center">
+        <Typography
+          fontSize={26}
+          fontWeight="bold"
+          color="#4CAF50"
+          textAlign="center"
+        >
           Welcome to MilkPro Sales
         </Typography>
 
-        <Typography fontSize={18} fontStyle="italic" color="gray" textAlign="center">
+        <Typography
+          fontSize={18}
+          fontStyle="italic"
+          color="gray"
+          textAlign="center"
+        >
           Fresh Dairy Delivered Daily
         </Typography>
 

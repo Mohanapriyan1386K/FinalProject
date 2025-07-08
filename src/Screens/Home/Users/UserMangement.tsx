@@ -187,7 +187,7 @@ function UserMangement() {
       title: "Pay Type",
       dataIndex: "pay_type",
       key: "pay_type",
-      render: (pay_type: number) => (pay_type === 1 ? "Monthly" : "Daily"),
+      render: (pay_type: number) => (pay_type === 1 ? "Daily" : "Monthly"),
     },
     {
       title: "Status",

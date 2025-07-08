@@ -530,8 +530,8 @@ const CreateUser = () => {
                   onChange={(val) => setFieldValue("pay_type", val)}
                   placeholder="Select pay type"
                 >
-                  <Option value="1">Prepaid</Option>
-                  <Option value="2">Postpaid</Option>
+                  <Option value="1">Daily</Option>
+                  <Option value="2">Monthly</Option>
                 </Select>
                 {errors.pay_type && (
                   <div className="text-danger">{errors.pay_type}</div>

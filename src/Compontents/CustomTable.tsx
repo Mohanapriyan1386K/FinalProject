@@ -31,6 +31,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
       }))}
       loading={loading}
       pagination={{
+        className:"custom-pagination",
         current: currentPage,
         pageSize,
         total,

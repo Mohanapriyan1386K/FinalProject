@@ -29,7 +29,7 @@ function Reason() {
     created_at: string;
     status: number;
     status_text: string;
-    type: number;
+    type: string;
     type_name: string;
     updated_at: string;
   }
@@ -58,7 +58,7 @@ function Reason() {
     setEditData({
       id: record.id,
       name: record.name,
-      type: record.type.toString(),
+      type: record.type
     });
     setIsModalOpen(true);
   };
