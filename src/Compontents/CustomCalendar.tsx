@@ -1,6 +1,5 @@
 import React from "react";
 import { Calendar, Select } from "antd";
-import type { CalendarProps } from "antd";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 
@@ -20,16 +19,10 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const currentYear = today.year();
   const currentMonth = today.month();
 
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - i); // Only current and past 9 years
-
-  const months = Array.from({ length: currentMonth + 1 }, (_, i) =>
-    dayjs().month(i).format("MMM")
-  );
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i); 
 
   const onYearChange = (year: number) => {
     let newDate = selectedDate.year(year);
-
-    // If selected year is current year and selected month > current month, reset month to current
     if (year === currentYear && selectedDate.month() > currentMonth) {
       newDate = newDate.month(currentMonth);
     }
@@ -43,7 +36,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   };
 
   const disableFutureDates = (date: Dayjs) => {
-    return date.isAfter(today, 'day'); // disables tomorrow and beyond
+    return date.isAfter(today, 'day');
   };
 
   return (

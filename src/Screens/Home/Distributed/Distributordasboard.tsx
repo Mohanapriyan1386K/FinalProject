@@ -76,7 +76,7 @@ const App: React.FC = () => {
       })
   };
 
-  const getusers = (date: Dayjs) => {
+  const getusers = (_date: Dayjs) => {
     // const formattedDate = date.format("YYYY-MM-DD");
     const payload = new FormData();
     payload.append("token", Token);
