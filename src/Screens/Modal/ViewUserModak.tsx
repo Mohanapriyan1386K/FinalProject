@@ -84,7 +84,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
                 dataIndex: "method",
                 key: "method",
                 render: (value: number) =>
-                  value === 1 ? "Morning" : value === 2 ? "Evening" : "Unknown",
+                  value === 1 ? "Cash" : value === 2 ? "UPI" : "Unknown",
               },
               {
                 title: "Start Date",
@@ -103,7 +103,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
             pagination={false}
             columns={[
               { title: "Quantity", dataIndex: "quantity", key: "quantity" },
-              { title: "Method", dataIndex: "method", key: "method",render:(value:number)=>value==1 ?"Moring":"Evening" },
+              { title: "Method", dataIndex: "method", key: "method",render:(value:number)=>value==1 ?"Cash":"UPI" },
               {
                 title: "Scheduled Date",
                 dataIndex: "scheduled_date",

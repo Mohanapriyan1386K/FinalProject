@@ -379,7 +379,7 @@ const Placeorder = () => {
               onSubmit={formik.handleSubmit}
               sx={{ maxWidth: 500, mx: "auto", p: 2 }}
             >
-              {hasMorning && activeslot.data.id === 1 && (
+              {hasMorning || activeslot.data.id == 1 && (
                 <CustomInputField
                   fullWidth
                   label="Morning Quantity"
@@ -398,7 +398,7 @@ const Placeorder = () => {
                 />
               )}
 
-              {hasEvening && activeslot.data.id === 2 && (
+              {hasEvening || activeslot.data.id == 2 && (
                 <CustomInputField
                   fullWidth
                   label="Evening Quantity"
