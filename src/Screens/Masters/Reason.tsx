@@ -233,7 +233,6 @@ function Reason() {
         </Box>
       ) : (
         <Box>
-          <Paper sx={{ padding: 2 }}>
             <Box
               sx={{
                 padding: 2,
@@ -267,7 +266,6 @@ function Reason() {
                 setPageSize(pageSize);
               }}
             />
-          </Paper>
 
           <ReasonFormModal
             visible={isModalOpen}

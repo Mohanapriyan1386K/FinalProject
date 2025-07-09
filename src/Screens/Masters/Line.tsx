@@ -8,9 +8,9 @@ import {
   masterLineListUpadate,
 } from "../../Services/ApiService";
 import type { ColumnsType } from "antd/es/table";
-import { Tag, Tooltip } from "antd";
+import { Tag, Tooltip} from "antd";
 import CustomTable from "../../Compontents/CustomTable";
-import { Box } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -287,7 +287,8 @@ function Line() {
         </Box>
       ) : (
         <div>
-          <div style={{ textAlign: "right", marginBottom: 16 }}>
+          <Paper sx={{display:"flex",alignItems:"center",justifyContent:"space-between",backgroundColor:"#E8F5E9",marginBottom:2,padding:2}}>
+            <Typography sx={{fontWeight:700,fontSize:25}}>Line</Typography>
             <CustomButton 
               buttonName="ADD +"
               onClick={() => setAddmodal(true)}
@@ -299,7 +300,7 @@ function Line() {
                 borderRadius: "4px",
                 cursor: "pointer",
               }}/>
-          </div>
+          </Paper>
 
           <CustomTable
             columns={routeColumns}

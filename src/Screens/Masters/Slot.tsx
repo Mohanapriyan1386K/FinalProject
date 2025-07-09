@@ -7,8 +7,9 @@ import {Tooltip } from "antd";
 import { EditOutlined } from "@mui/icons-material";
 import MastersSlotupdate from "../Modal/MastersSlotupdate";
 import { useFormik } from "formik";
-import { Box } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
+import CustomButton from "../../Compontents/CoustomButton";
 
 interface InventorySlot {
   id: number;
@@ -154,6 +155,9 @@ function Slot() {
 
   return (
     <>
+      <Paper sx={{display:"flex",alignItems:"center",justifyContent:"space-between",backgroundColor:"#E8F5E9",marginBottom:2,padding:2}}>
+            <Typography sx={{fontWeight:700,fontSize:25}}>Slot</Typography>
+          </Paper>
       <CustomTable columns={columns} dataSource={slotdata} />
       <MastersSlotupdate
         isOpen={modalOpen}
