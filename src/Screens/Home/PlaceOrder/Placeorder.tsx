@@ -71,6 +71,7 @@ const Placeorder = () => {
   }
 
   interface Invoice {
+    length: number;
     id: number;
     amount: string;
     file_path: string;
@@ -86,7 +87,7 @@ const Placeorder = () => {
     email: string;
     phone: string;
     customer_type: number;
-    pay_type: number;
+    pay_type: any;
     line_name: string;
     price_tag_name: string;
     status: number;
@@ -201,10 +202,10 @@ const Placeorder = () => {
       morning_quantity: "",
       evening_quantity: "",
       is_paid: false,
-      payment_type: "",
+      payment_type: 0,
       transaction_id: "",
       is_monthly_paid: false,
-      monthly_payment_type: "",
+      monthly_payment_type: 0,
       monthly_transaction_id: "",
     },
     validationSchema,
@@ -488,7 +489,7 @@ const Placeorder = () => {
               )}
 
               {data.invoice_data &&
-                data.invoice_data.length === 0 &&
+                data.invoice_data.length > 0 &&
                 data.pay_type === 2 && (
                   <>
                      <Box sx={{marginBottom:2}}>

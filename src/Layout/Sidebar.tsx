@@ -23,9 +23,10 @@ import {
   Menu,
   ExpandLess,
   ExpandMore,
-  ChevronRight} from "@mui/icons-material";
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import RealEstateAgentIcon from '@mui/icons-material/RealEstateAgent';
+  ChevronRight,
+} from "@mui/icons-material";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import RealEstateAgentIcon from "@mui/icons-material/RealEstateAgent";
 import { useState, type ReactNode } from "react";
 import LogoutModal from "../Screens/Modal/LogoutModal";
 import { useUsertype } from "../Hooks/UserHook";
@@ -69,7 +70,7 @@ const menuItems: MenuItemType[] = [
         icon: <ChevronRight />,
         allowedUserTypes: [1],
       },
-       {
+      {
         text: "Reason",
         to: "/dashboard/Reason",
         icon: <ChevronRight />,
@@ -77,12 +78,11 @@ const menuItems: MenuItemType[] = [
       },
     ],
   },
-
   {
-   text:"Sales Log",
-   to: "/dashboard/saleslog",
-   allowedUserTypes: [1],
-   icon:<RealEstateAgentIcon/>,
+    text: "Sales Log",
+    to: "/dashboard/saleslog",
+    allowedUserTypes: [1],
+    icon: <RealEstateAgentIcon />,
   },
   {
     text: "Inventory",
@@ -97,20 +97,17 @@ const menuItems: MenuItemType[] = [
     allowedUserTypes: [1],
   },
   {
-    text:"Place order",
-    to:"/dashboard/PlaceOrder",
-    icon:<AddShoppingCartIcon/>,
-    allowedUserTypes:[1]
+    text: "Place order",
+    to: "/dashboard/PlaceOrder",
+    icon: <AddShoppingCartIcon />,
+    allowedUserTypes: [1],
   },
-
-  // distribtoir
   {
     text: "Users",
     to: "/distributor",
     icon: <GroupAdd />,
     allowedUserTypes: [4],
   },
-  
 ];
 
 const commonListItemStyle = (collapsed: boolean) => ({
@@ -149,9 +146,7 @@ const NestedMenuItem: React.FC<NestedMenuProps> = ({
   return (
     <>
       <ListItem onClick={handleClick} sx={commonListItemStyle(collapsed)}>
-        <ListItemIcon sx={commonIconStyle(collapsed)}>
-          {item.icon}
-        </ListItemIcon>
+        <ListItemIcon sx={commonIconStyle(collapsed)}>{item.icon}</ListItemIcon>
         {!collapsed && (
           <>
             <ListItemText primary={item.text} />
@@ -164,23 +159,25 @@ const NestedMenuItem: React.FC<NestedMenuProps> = ({
         <List component="div" disablePadding>
           {item.children
             ?.filter((child) => child.allowedUserTypes.includes(usertype))
-            .map((child) => (
-              <ListItem
-                key={child.text}
-                component={NavLink}
-                to={child.to}
-                onClick={() => isMobile && setMobileOpen(false)}
-                sx={{
-                  ...commonListItemStyle(collapsed),
-                  pl: collapsed ? 2 : 4,
-                }}
-              >
-                <ListItemIcon sx={commonIconStyle(collapsed)}>
-                  {child.icon || <ChevronRight />}
-                </ListItemIcon>
-                {!collapsed && <ListItemText primary={child.text} />}
-              </ListItem>
-            ))}
+            .map((child) =>
+              child.to ? (
+                <ListItem
+                  key={child.text}
+                  component={NavLink}
+                  to={child.to}
+                  onClick={() => isMobile && setMobileOpen(false)}
+                  sx={{
+                    ...commonListItemStyle(collapsed),
+                    pl: collapsed ? 2 : 4,
+                  }}
+                >
+                  <ListItemIcon sx={commonIconStyle(collapsed)}>
+                    {child.icon || <ChevronRight />}
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText primary={child.text} />}
+                </ListItem>
+              ) : null
+            )}
         </List>
       </Collapse>
     </>
@@ -196,7 +193,7 @@ const Sidebar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const drawerWidth = collapsed ? 80 :200;
+  const drawerWidth = collapsed ? 80 : 200;
 
   const toggleSidebar = () => {
     if (isMobile) {
@@ -243,7 +240,7 @@ const Sidebar: React.FC = () => {
                   setMobileOpen={setMobileOpen}
                   usertype={usertype}
                 />
-              ) : (
+              ) : item.to ? (
                 <ListItem
                   key={item.text}
                   component={NavLink}
@@ -256,7 +253,7 @@ const Sidebar: React.FC = () => {
                   </ListItemIcon>
                   {!collapsed && <ListItemText primary={item.text} />}
                 </ListItem>
-              )
+              ) : null
             )}
         </List>
 

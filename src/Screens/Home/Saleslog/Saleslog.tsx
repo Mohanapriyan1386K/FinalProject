@@ -55,7 +55,8 @@ function Saleslog() {
   const [data, setData] = useState<DistributionLog[]>([]);
   const [distbutordropdown, setdisributeddropdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [vendormilkreport, setvendormilkreport] = useState<InventorySummaryVendor>();
+  const [vendormilkreport, setvendormilkreport] =
+    useState<InventorySummaryVendor>();
   const token = useUserdata();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +81,9 @@ function Saleslog() {
     {
       title: "S.No",
       render: (_: any, __: any, index: number) => (
-        <span style={{ fontSize: 12 }}>{(currentPage - 1) * pageSize + index + 1}</span>
+        <span style={{ fontSize: 12 }}>
+          {(currentPage - 1) * pageSize + index + 1}
+        </span>
       ),
       width: 10,
     },
@@ -94,8 +97,16 @@ function Saleslog() {
     { title: "Slot", dataIndex: "slot_name", key: "slot_name" },
     { title: "Type", dataIndex: "type_name", key: "type_name" },
     { title: "Quantity", dataIndex: "quantity", key: "quantity" },
-    { title: "Previous Qty", dataIndex: "pervious_quantity", key: "pervious_quantity" },
-    { title: "Remaining Qty", dataIndex: "remaining_quantity", key: "remaining_quantity" },
+    {
+      title: "Previous Qty",
+      dataIndex: "pervious_quantity",
+      key: "pervious_quantity",
+    },
+    {
+      title: "Remaining Qty",
+      dataIndex: "remaining_quantity",
+      key: "remaining_quantity",
+    },
     {
       title: "Distributed",
       dataIndex: "is_distributed",
@@ -144,7 +155,8 @@ function Saleslog() {
     payload.append("page", page.toString());
     payload.append("limit", limit.toString());
 
-    if (filters.distributor_id) payload.append("distributor_id", filters.distributor_id);
+    if (filters.distributor_id)
+      payload.append("distributor_id", filters.distributor_id);
     if (filters.from_date) payload.append("from_date", filters.from_date);
     if (filters.to_date) payload.append("to_date", filters.to_date);
     if (filters.log_type) payload.append("log_type", filters.log_type);
@@ -212,7 +224,6 @@ function Saleslog() {
             <label>Log Type</label>
             <Select
               style={{ width: "100%" }}
-              name="log_type"
               value={formik.values.log_type}
               onChange={(value) => formik.setFieldValue("log_type", value)}
               onBlur={() => formik.setFieldTouched("log_type", true)}
@@ -223,14 +234,16 @@ function Saleslog() {
               <Option value="2">Vendor</Option>
             </Select>
           </Box>
+
           {formik.values.log_type === "1" && (
             <Box sx={{ minWidth: 250 }}>
               <label>Distributor</label>
               <Select
                 style={{ width: "100%" }}
-                name="distributor_id"
                 value={formik.values.distributor_id}
-                onChange={(value) => formik.setFieldValue("distributor_id", value)}
+                onChange={(value) =>
+                  formik.setFieldValue("distributor_id", value)
+                }
                 onBlur={() => formik.setFieldTouched("distributor_id", true)}
                 placeholder="Select Distributor"
                 allowClear
@@ -287,23 +300,33 @@ function Saleslog() {
         <Box>
           {formik.values.log_type === "1" && (
             <Paper sx={{ padding: 2, display: "flex", gap: 2 }}>
-              <Box sx={{ backgroundColor: "#E8F5E9", padding: 2, borderRadius: 2 }}>
+              <Box
+                sx={{ backgroundColor: "#E8F5E9", padding: 2, borderRadius: 2 }}
+              >
                 <Typography>Distributed Sales Quantity</Typography>
-                <Typography>{vendormilkreport?.distributor_sales_qty}</Typography>
+                <Typography>
+                  {vendormilkreport?.distributor_sales_qty}
+                </Typography>
               </Box>
               <Box sx={{ backgroundColor: "#FFF0F6", padding: 2 }}>
                 <Typography>Distributed Return Quantity</Typography>
-                <Typography>{vendormilkreport?.distributor_return_qty}</Typography>
+                <Typography>
+                  {vendormilkreport?.distributor_return_qty}
+                </Typography>
               </Box>
               <Box sx={{ backgroundColor: "#F6FFED", padding: 2 }}>
                 <Typography>Distributed Taken Quantity</Typography>
-                <Typography>{vendormilkreport?.distributor_taken_qty}</Typography>
+                <Typography>
+                  {vendormilkreport?.distributor_taken_qty}
+                </Typography>
               </Box>
             </Paper>
           )}
           {formik.values.log_type === "2" && (
             <Paper sx={{ padding: 2, display: "flex", gap: 2 }}>
-              <Box sx={{ backgroundColor: "#E8F5E9", padding: 2, borderRadius: 2 }}>
+              <Box
+                sx={{ backgroundColor: "#E8F5E9", padding: 2, borderRadius: 2 }}
+              >
                 <Typography>Remaining Quantity</Typography>
                 <Typography>{vendormilkreport?.remaining_qty}</Typography>
               </Box>
