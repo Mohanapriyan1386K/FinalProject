@@ -363,10 +363,11 @@ const AssignDistributor = () => {
               <CustomButton
                 buttonName=" Cancel"
                 onClick={() => window.history.back()}
+                sx={{backgroundColor:"red"}}
               />
             </Col>
             <Col>
-              <CustomButton type="submit" buttonName=" Submit Assignment" />
+              <CustomButton type="submit" buttonName=" Submit Assignment" sx={{backgroundColor:"#4EB24E"}} />
             </Col>
           </Row>
         </form>
