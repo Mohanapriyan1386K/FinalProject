@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Select } from "antd";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -13,7 +13,7 @@ import {
   handleEditUser,
 } from "../../../Services/ApiService";
 import { useNavigate } from "react-router-dom";
-import {useUserdata} from "../../../Hooks/UserHook"
+import { useUserdata } from "../../../Hooks/UserHook";
 import CustomInputField from "../../../Compontents/CoustomInputFiled";
 import { Box, Paper } from "@mui/material";
 import CustomButton from "../../../Compontents/CoustomButton";
@@ -112,11 +112,11 @@ const getValidationSchema = (isEdit: boolean) =>
   });
 
 const CreateUser = () => {
-  const token=useUserdata()
+  const token = useUserdata();
   const navigate = useNavigate();
   const location = useLocation();
   const id = location.state?.id;
-  const usertype=location.state?.user_type;
+  const usertype = location.state?.user_type;
   const isEdit = !!id;
   const [linesList, setLinesList] = useState<Line[]>([]);
   const [priceTagList, setPriceTagList] = useState<PriceTag[]>([]);
@@ -174,96 +174,94 @@ const CreateUser = () => {
     validateOnChange: false,
   });
 
- const submitUserForm = (values: FormValues) => {
-  if (!token) {
-    toast.error("Token missing. Please login again.");
-    return;
-  }
+  const submitUserForm = (values: FormValues) => {
+    if (!token) {
+      toast.error("Token missing. Please login again.");
+      return;
+    }
 
-  const isCustomer = values.user_type === "5";
-  const isRegularCustomer = isCustomer && values.customer_type === "1";
+    const isCustomer = values.user_type === "5";
+    const isRegularCustomer = isCustomer && values.customer_type === "1";
 
-  const morningSlot = values.slot_data?.[0] || {};
-  const eveningSlot = values.slot_data?.[1] || {};
+    const morningSlot = values.slot_data?.[0] || {};
+    const eveningSlot = values.slot_data?.[1] || {};
 
-  const slotData = isRegularCustomer
-    ? [
-        ...(morningSlot.quantity &&
-        morningSlot.method &&
-        morningSlot.start_date
-          ? [
-              {
-                id: morningSlot.id,
-                slot_id: morningSlot.slot_id,
-                quantity: parseFloat(morningSlot.quantity),
-                method: parseInt(morningSlot.method, 10),
-                start_date: morningSlot.start_date,
-              },
-            ]
-          : []),
-        ...(eveningSlot.quantity && eveningSlot.method
-          ? [
-              {
-                id: eveningSlot.id,
-                slot_id: eveningSlot.slot_id,
-                quantity: parseFloat(eveningSlot.quantity),
-                method: parseInt(eveningSlot.method, 10),
-                start_date: morningSlot.start_date,
-              },
-            ]
-          : []),
-      ]
-    : [];
+    const slotData = isRegularCustomer
+      ? [
+          ...(morningSlot.quantity &&
+          morningSlot.method &&
+          morningSlot.start_date
+            ? [
+                {
+                  id: morningSlot.id,
+                  slot_id: morningSlot.slot_id,
+                  quantity: parseFloat(morningSlot.quantity),
+                  method: parseInt(morningSlot.method, 10),
+                  start_date: morningSlot.start_date,
+                },
+              ]
+            : []),
+          ...(eveningSlot.quantity && eveningSlot.method
+            ? [
+                {
+                  id: eveningSlot.id,
+                  slot_id: eveningSlot.slot_id,
+                  quantity: parseFloat(eveningSlot.quantity),
+                  method: parseInt(eveningSlot.method, 10),
+                  start_date: morningSlot.start_date,
+                },
+              ]
+            : []),
+        ]
+      : [];
 
-  const payload: any = {
-    token,
-    ...(values.name && { name: values.name }),
-    ...(values.user_name && { user_name: values.user_name }),
-    ...(values.email && { email: values.email }),
-    ...(values.phone && { phone: values.phone }),
-    ...(values.alternative_number && {
-      alternative_number: values.alternative_number,
-    }),
-    ...(values.user_type && { user_type: parseInt(values.user_type) }),
-    ...(isEdit && id ? { id: parseInt(id) } : { password: values.password }),
-    ...(isCustomer && {
-      customer_type: parseInt(values.customer_type),
-      line_id: parseInt(values.line_id),
-      price_tag_id: parseInt(values.price_tag_id),
-      pay_type: parseInt(values.pay_type),
-      ...(isRegularCustomer && { slot_data: slotData }),
-    }),
+    const payload: any = {
+      token,
+      ...(values.name && { name: values.name }),
+      ...(values.user_name && { user_name: values.user_name }),
+      ...(values.email && { email: values.email }),
+      ...(values.phone && { phone: values.phone }),
+      ...(values.alternative_number && {
+        alternative_number: values.alternative_number,
+      }),
+      ...(values.user_type && { user_type: parseInt(values.user_type) }),
+      ...(isEdit && id ? { id: parseInt(id) } : { password: values.password }),
+      ...(isCustomer && {
+        customer_type: parseInt(values.customer_type),
+        line_id: parseInt(values.line_id),
+        price_tag_id: parseInt(values.price_tag_id),
+        pay_type: parseInt(values.pay_type),
+        ...(isRegularCustomer && { slot_data: slotData }),
+      }),
+    };
+
+    const request = isEdit ? handleEditUser : handleCreateUser;
+
+    request(payload)
+      .then((response) => {
+        const resData = response?.data;
+        if (resData?.status === 1) {
+          toast.success(resData.msg || "User saved successfully");
+          navigate(-1);
+          resetForm();
+        } else {
+          toast.error(resData?.msg || "Something went wrong");
+        }
+      })
+      .catch(() => {
+        toast.error(isEdit ? "Failed to update user" : "Failed to create user");
+      });
   };
-
-  const request = isEdit ? handleEditUser : handleCreateUser;
-
-  request(payload)
-    .then((response) => {
-      const resData = response?.data;
-      if (resData?.status === 1) {
-        toast.success(resData.msg || "User saved successfully");
-        navigate(-1);
-        resetForm();
-      } else {
-        toast.error(resData?.msg || "Something went wrong");
-      }
-    })
-    .catch(() => {
-      toast.error(isEdit ? "Failed to update user" : "Failed to create user");
-    });
-};
-
 
   useEffect(() => {
     if (id && token) {
       const formData = new FormData();
-      formData.append("token",token);
+      formData.append("token", token);
       formData.append("user_id", id);
 
       fetchUserById(formData)
         .then((res) => {
           const data = res.data.data;
-
           setValues({
             name: data.name || "",
             user_name: data.user_name || "",
@@ -272,8 +270,8 @@ const CreateUser = () => {
             alternative_number: data.alternative_number || "",
             user_type: String(data.user_type || ""),
             customer_type: String(data.customer_type || ""),
-            line_id: String(data.line_id || ""),
-            price_tag_id: String(data.price_tag_id || ""),
+            line_id: String(data.line_id || ""), // convert to string
+            price_tag_id: String(data.price_tag_id || ""), // convert to string
             pay_type: data.pay_type != null ? String(data.pay_type) : "",
             slot_data: data.slot_data || [
               { slot_id: 1, quantity: "", method: "", start_date: "" },
@@ -354,208 +352,227 @@ const CreateUser = () => {
 
   return (
     <div className="container mt-4">
-      {error && <div className="alert alert-danger">{error}</div>}      
-        <Paper sx={{backgroundColor:"#E8F5E9", padding:2,fontSize:"25px",fontWeight:"700"}}>
-          <Box sx={{display:"flex",justifyContent:"space-between"}}>
-             {isEdit?"EDIT USER":"ADD USER"}
-             <CustomButton buttonName="Back" sx={{backgroundColor:"green"}} onClick={()=>{navigate(-1)}} />
-          </Box>
-        </Paper>
-      
-      <Paper sx={{backgroundColor:"#E8F5E9", padding:2,marginTop:2}}>
-      <form onSubmit={handleSubmit}>
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <CustomInputField
-              placeholder="name"
-              label="Name"
-              name="name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.name}
-              touched={touched.name}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <CustomInputField
-              placeholder="username"
-              label="Username"
-              name="user_name"
-              value={values.user_name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.user_name}
-              touched={touched.user_name}
-            />
-          </div>
-        </div>
+      {error && <div className="alert alert-danger">{error}</div>}
+      <Paper
+        sx={{
+          backgroundColor: "#E8F5E9",
+          padding: 2,
+          fontSize: "25px",
+          fontWeight: "700",
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          {isEdit ? "EDIT USER" : "ADD USER"}
+          <CustomButton
+            buttonName="Back"
+            sx={{ backgroundColor: "green" }}
+            onClick={() => {
+              navigate(-1);
+            }}
+          />
+        </Box>
+      </Paper>
 
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <CustomInputField
-              placeholder="email"
-              label="Email"
-              name="email"
-              value={values.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.email}
-              touched={touched.email}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <CustomInputField
-              placeholder="phone"
-              label="Phone"
-              name="phone"
-              value={values.phone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.phone}
-              touched={touched.phone}
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <CustomInputField
-              placeholder="alternative number"
-              label="Alternative Number"
-              name="alternative_number"
-              value={values.alternative_number}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.alternative_number}
-              touched={touched.alternative_number}
-            />
-          </div>
-          {!isEdit && (
+      <Paper sx={{ backgroundColor: "#E8F5E9", padding: 2, marginTop: 2 }}>
+        <form onSubmit={handleSubmit}>
+          <div className="row">
             <div className="col-md-6 mb-3">
               <CustomInputField
-                placeholder="password"
-                label="Password"
-                name="password"
-                type="password"
-                value={values.password}
+                placeholder="name"
+                label="Name"
+                name="name"
+                value={values.name}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.password}
-                touched={touched.password}
+                error={errors.name}
+                touched={touched.name}
               />
             </div>
-          )}
-        </div>
+            <div className="col-md-6 mb-3">
+              <CustomInputField
+                placeholder="username"
+                label="Username"
+                name="user_name"
+                value={values.user_name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.user_name}
+                touched={touched.user_name}
+              />
+            </div>
+          </div>
 
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <label>User Type</label>
-            <Select
-              className="w-100"
-              placeholder="Select user type"
-              value={values.user_type}
-              onChange={(val) => setFieldValue("user_type", val)}
-            >
-              <Option value="2">Admin</Option>
-              <Option value="3">Vendor</Option>
-              <Option value="4">Distributor</Option>
-              <Option value="5">Customer</Option>
-            </Select>
-            {errors.user_type && (
-              <div className="text-danger">{errors.user_type}</div>
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <CustomInputField
+                placeholder="email"
+                label="Email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.email}
+                touched={touched.email}
+              />
+            </div>
+            <div className="col-md-6 mb-3">
+              <CustomInputField
+                placeholder="phone"
+                label="Phone"
+                name="phone"
+                value={values.phone}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.phone}
+                touched={touched.phone}
+              />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <CustomInputField
+                placeholder="alternative number"
+                label="Alternative Number"
+                name="alternative_number"
+                value={values.alternative_number}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.alternative_number}
+                touched={touched.alternative_number}
+              />
+            </div>
+            {!isEdit && (
+              <div className="col-md-6 mb-3">
+                <CustomInputField
+                  placeholder="password"
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={errors.password}
+                  touched={touched.password}
+                />
+              </div>
             )}
           </div>
-        </div>
 
-        {values.user_type === "5" && (
-          <>
-            <div className="row">
-              <div className="col-md-4 mb-3">
-                <label>Customer Type</label>
-                <Select
-                  className="w-100"
-                  value={values.customer_type}
-                  onChange={(val) => setFieldValue("customer_type", val)}
-                  placeholder="Select customer type"
-                >
-                  <Option value="1">Regular</Option>
-                  <Option value="2">Occasional</Option>
-                </Select>
-                {errors.customer_type && (
-                  <div className="text-danger">{errors.customer_type.toString()}</div>
-                )}
-              </div>
-              <div className="col-md-4 mb-3">
-                <label>Line</label>
-                <Select
-                  className="w-100"
-                  value={values.line_id}
-                  onChange={(val) => setFieldValue("line_id", val)}
-                  placeholder="Select line"
-                >
-                  {linesList.map((line) => (
-                    <Option key={line.id} value={line.id}>
-                      {line.line_name}
-                    </Option>
-                  ))}
-                </Select>
-                {errors.line_id && (
-                  <div className="text-danger">{errors.line_id}</div>
-                )}
-              </div>
-              <div className="col-md-4 mb-3">
-                <label>Price Tag</label>
-                <Select
-                  className="w-100"
-                  value={values.price_tag_id}
-                  onChange={(val) => setFieldValue("price_tag_id", val)}
-                  placeholder="Select price tag"
-                >
-                  {priceTagList.map((tag) => (
-                    <Option key={tag.id} value={tag.id}>
-                      {tag.price_tag_name}
-                    </Option>
-                  ))}
-                </Select>
-                {errors.price_tag_id && (
-                  <div className="text-danger">{errors.price_tag_id}</div>
-                )}
-              </div>
-              <div className="col-md-4 mb-3">
-                <label>Pay Type</label>
-                <Select
-                  className="w-100"
-                  value={values.pay_type}
-                  onChange={(val) => setFieldValue("pay_type", val)}
-                  placeholder="Select pay type"
-                >
-                  <Option value="1">Daily</Option>
-                  <Option value="2">Monthly</Option>
-                </Select>
-                {errors.pay_type && (
-                  <div className="text-danger">{errors.pay_type}</div>
-                )}
-              </div>
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <label>User Type</label>
+              <Select
+                className="w-100"
+                placeholder="Select user type"
+                value={values.user_type}
+                onChange={(val) => setFieldValue("user_type", val)}
+              >
+                <Option value="2">Admin</Option>
+                <Option value="3">Vendor</Option>
+                <Option value="4">Distributor</Option>
+                <Option value="5">Customer</Option>
+              </Select>
+              {errors.user_type && (
+                <div className="text-danger">{errors.user_type}</div>
+              )}
             </div>
+          </div>
 
-            {values.customer_type === "1" && (
-              <>
-                {renderSlotField(0, "Morning Slot")}
-                {renderSlotField(1, "Evening Slot")}
-              </>
-            )}
-          </>
-        )}
+          {values.user_type === "5" && (
+            <>
+              <div className="row">
+                <div className="col-md-4 mb-3">
+                  <label>Customer Type</label>
+                  <Select
+                    className="w-100"
+                    value={values.customer_type}
+                    onChange={(val) => setFieldValue("customer_type", val)}
+                    placeholder="Select customer type"
+                  >
+                    <Option value="1">Regular</Option>
+                    <Option value="2">Occasional</Option>
+                  </Select>
+                  {errors.customer_type && (
+                    <div className="text-danger">
+                      {errors.customer_type.toString()}
+                    </div>
+                  )}
+                </div>
+                <div className="col-md-4 mb-3">
+                  <label>Line</label>
+                  <Select
+                    className="w-100"
+                    value={values.line_id}
+                    onChange={(val) => setFieldValue("line_id", val)}
+                    placeholder="Select line"
+                  >
+                    {linesList.map((line) => (
+                      <Option key={line.id} value={String(line.id)}>
+                        {line.line_name}
+                      </Option>
+                    ))}
+                  </Select>
+                  {errors.line_id && (
+                    <div className="text-danger">{errors.line_id}</div>
+                  )}
+                </div>
+                <div className="col-md-4 mb-3">
+                  <label>Price Tag</label>
+                  <Select
+                    className="w-100"
+                    value={values.price_tag_id}
+                    onChange={(val) => setFieldValue("price_tag_id", val)}
+                    placeholder="Select price tag"
+                  >
+                    {priceTagList.map((tag) => (
+                      <Option key={tag.id} value={String(tag.id)}>
+                        {tag.price_tag_name}
+                      </Option>
+                    ))}
+                  </Select>
+                  {errors.price_tag_id && (
+                    <div className="text-danger">{errors.price_tag_id}</div>
+                  )}
+                </div>
+                <div className="col-md-4 mb-3">
+                  <label>Pay Type</label>
+                  <Select
+                    className="w-100"
+                    value={values.pay_type}
+                    onChange={(val) => setFieldValue("pay_type", val)}
+                    placeholder="Select pay type"
+                  >
+                    <Option value="1">Daily</Option>
+                    <Option value="2">Monthly</Option>
+                  </Select>
+                  {errors.pay_type && (
+                    <div className="text-danger">{errors.pay_type}</div>
+                  )}
+                </div>
+              </div>
 
-        <div className="text-end mt-3">
-          <button className="btn btn-primary" type="submit" style={{backgroundColor:"green"}} >
-            {id ? "Update" : "Create"} User
-          </button>
-        </div>
-      </form>
-       </Paper>
-       <ToastContainer/>
+              {values.customer_type === "1" && (
+                <>
+                  {renderSlotField(0, "Morning Slot")}
+                  {renderSlotField(1, "Evening Slot")}
+                </>
+              )}
+            </>
+          )}
+
+          <div className="text-end mt-3">
+            <button
+              className="btn btn-primary"
+              type="submit"
+              style={{ backgroundColor: "green" }}
+            >
+              {id ? "Update" : "Create"} User
+            </button>
+          </div>
+        </form>
+      </Paper>
+      <ToastContainer />
     </div>
   );
 };

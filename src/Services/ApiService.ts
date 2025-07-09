@@ -286,3 +286,7 @@ export const listdistbutedlog=(payload:any)=>{
   return axiosInstance.post("/milk-api/milk-sales/list-distributor-log",payload)
 }
 
+
+export const VendorMilkreport=(payload:any)=>{
+  return axiosInstance.post("/milk-api/dashboard/vendor-milk-report",payload)
+}
