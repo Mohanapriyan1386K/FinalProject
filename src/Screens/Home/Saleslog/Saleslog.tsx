@@ -11,7 +11,6 @@ import {
 import { Select } from "antd";
 import CustomTable from "../../../Compontents/CustomTable";
 import CustomButton from "../../../Compontents/CoustomButton";
-import Loader from "../../../Compontents/Loader"
 
 const { Option } = Select;
 

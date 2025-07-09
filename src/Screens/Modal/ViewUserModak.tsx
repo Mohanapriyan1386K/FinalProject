@@ -1,5 +1,5 @@
 import GlobalModal from "../../Compontents/GlobalModal";
-import { Descriptions,Table, Typography } from "antd";
+import { Descriptions, Table, Typography } from "antd";
 import React from "react";
 
 interface ViewUserModalProps {
@@ -78,9 +78,14 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
             bordered
             pagination={false}
             columns={[
-              { title: "Slot ID", dataIndex: "slot_id", key: "slot_id" },
               { title: "Quantity", dataIndex: "quantity", key: "quantity" },
-              { title: "Method", dataIndex: "method", key: "method" },
+              {
+                title: "Method",
+                dataIndex: "method",
+                key: "method",
+                render: (value: number) =>
+                  value === 1 ? "Morning" : value === 2 ? "Evening" : "Unknown",
+              },
               {
                 title: "Start Date",
                 dataIndex: "start_date",
@@ -97,9 +102,8 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
             bordered
             pagination={false}
             columns={[
-              { title: "Slot ID", dataIndex: "slot_id", key: "slot_id" },
               { title: "Quantity", dataIndex: "quantity", key: "quantity" },
-              { title: "Method", dataIndex: "method", key: "method" },
+              { title: "Method", dataIndex: "method", key: "method",render:(value:number)=>value==1 ?"Moring":"Evening" },
               {
                 title: "Scheduled Date",
                 dataIndex: "scheduled_date",
