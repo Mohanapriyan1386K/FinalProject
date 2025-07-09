@@ -30,9 +30,6 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({
       {userData && (
         <>
           <Descriptions bordered column={2} size="small">
-            <Descriptions.Item label="User ID">
-              {userData.user_id}
-            </Descriptions.Item>
             <Descriptions.Item label="User Type">
               {userTypeMap[userData.user_type] || "Unknown"}
             </Descriptions.Item>
