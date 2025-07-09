@@ -5,7 +5,7 @@ import {
   masterLineListDelete,
   masterLineStautus,
   masterLineAdd,
-  masterLineListUpadate
+  masterLineListUpadate,
 } from "../../Services/ApiService";
 import type { ColumnsType } from "antd/es/table";
 import { Tag, Tooltip } from "antd";
@@ -23,6 +23,8 @@ import MasterAddLinsMoadal from "../Modal/MasterAddLinsMoadl";
 import Linupadate from "../Modal/LinesUpdateModal";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Loader from "../../Compontents/Loader";
+import CustomButton from "../../Compontents/CoustomButton";
 
 function Line() {
   interface RouteData {
@@ -58,7 +60,7 @@ function Line() {
       name: "",
       description: "",
     },
-    validationSchema:validationSchema,
+    validationSchema: validationSchema,
     onSubmit: (values) => {
       const payload = new FormData();
       payload.append("token", values.token);
@@ -278,71 +280,76 @@ function Line() {
   ];
 
   return (
-    <div>
-      <div style={{ textAlign: "right", marginBottom: 16 }}>
-        <button
-          onClick={() => setAddmodal(true)}
-          style={{
-            background: "#4EB24E",
-            color: "#fff",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          + Add Line
-        </button>
-      </div>
+    <>
+      {loading ? (
+        <Box>
+          <Loader />
+        </Box>
+      ) : (
+        <div>
+          <div style={{ textAlign: "right", marginBottom: 16 }}>
+            <CustomButton 
+              buttonName="ADD +"
+              onClick={() => setAddmodal(true)}
+              sx={{
+                background: "#4EB24E",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}/>
+          </div>
 
-      <CustomTable
-        columns={routeColumns}
-        dataSource={data}
-        currentPage={currentpage}
-        loading={loading}
-        onPageChange={handlePageChange}
-      />
+          <CustomTable
+            columns={routeColumns}
+            dataSource={data}
+            currentPage={currentpage}
+            onPageChange={handlePageChange}
+          />
 
-      <ConfirmActionModal
-        open={isDeleteModalOpen}
-        onCancel={() => setDeleteModalOpen(false)}
-        onConfirm={onDeleteConfirmed}
-        title="Confirm Delete"
-        content={`Are you sure you want to delete "${selectedRecord?.name}"?`}
-        confirmText="Delete"
-        cancelText="Cancel"
-      />
+          <ConfirmActionModal
+            open={isDeleteModalOpen}
+            onCancel={() => setDeleteModalOpen(false)}
+            onConfirm={onDeleteConfirmed}
+            title="Confirm Delete"
+            content={`Are you sure you want to delete "${selectedRecord?.name}"?`}
+            confirmText="Delete"
+            cancelText="Cancel"
+          />
 
-      <ConfirmActionModal
-        open={isStatusModalOpen}
-        onCancel={() => setStatusModalOpen(false)}
-        onConfirm={onStatusChangeConfirmed}
-        title="Confirm Status Change"
-        content={`Are you sure you want to ${
-          selectedRecord?.status === 1 ? "deactivate" : "activate"
-        } "${selectedRecord?.name}"?`}
-        confirmText="Yes"
-        cancelText="No"
-      />
+          <ConfirmActionModal
+            open={isStatusModalOpen}
+            onCancel={() => setStatusModalOpen(false)}
+            onConfirm={onStatusChangeConfirmed}
+            title="Confirm Status Change"
+            content={`Are you sure you want to ${
+              selectedRecord?.status === 1 ? "deactivate" : "activate"
+            } "${selectedRecord?.name}"?`}
+            confirmText="Yes"
+            cancelText="No"
+          />
 
-      <MasterAddLinsMoadal
-        formik={formik}
-        isOpen={isAddmodal}
-        onClose={() => {
-          setAddmodal(false);
-          formik.resetForm();
-        }}
-      />
+          <MasterAddLinsMoadal
+            formik={formik}
+            isOpen={isAddmodal}
+            onClose={() => {
+              setAddmodal(false);
+              formik.resetForm();
+            }}
+          />
 
-      <Linupadate
-        formik={formikUpdate}
-        isOpen={updatemodal}
-        onClose={() => {
-          setUpdateModalopen(false);
-          formikUpdate.resetForm();
-        }}
-      />
-    </div>
+          <Linupadate
+            formik={formikUpdate}
+            isOpen={updatemodal}
+            onClose={() => {
+              setUpdateModalopen(false);
+              formikUpdate.resetForm();
+            }}
+          />
+        </div>
+      )}
+    </>
   );
 }
 

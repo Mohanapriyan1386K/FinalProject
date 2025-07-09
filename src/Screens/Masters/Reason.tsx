@@ -21,6 +21,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import Loader from "../../Compontents/Loader";
 
 function Reason() {
   interface Reasondata {
@@ -40,14 +41,21 @@ function Reason() {
   const [currentpage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const token = useUserdata();
+  const [loading, setloading] = useState(false);
 
   const ReasonFetch = () => {
     const payload = new FormData();
     payload.append("token", token);
 
-    masterReasonList(payload).then((res) => {
-      setFetchdata(res.data.data);
-    });
+    masterReasonList(payload)
+      .then((res) => {
+        setFetchdata(res.data.data);
+        setloading(true)
+      })
+      .catch((error) => toast.error(error))
+      .finally(() => {
+        setloading(false);
+      });
   };
 
   useEffect(() => {
@@ -58,7 +66,7 @@ function Reason() {
     setEditData({
       id: record.id,
       name: record.name,
-      type: record.type
+      type: record.type,
     });
     setIsModalOpen(true);
   };
@@ -218,54 +226,64 @@ function Reason() {
   };
 
   return (
-    <Box>
-      <Paper sx={{padding:2}}>
-        <Box
-          sx={{
-            padding: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography sx={{ fontSize: "25px", fontWeight: 700 }}>
-            REASON
-          </Typography>
-          <CustomButton
-            buttonName="+ ADD REASON"
-            sx={{ backgroundColor: "#4EB24E" }}
-            onClick={() => {
-              setEditData(null);
-              setIsModalOpen(true);
-            }}
+    <>
+      {loading ? (
+        <Box>
+          <Loader />
+        </Box>
+      ) : (
+        <Box>
+          <Paper sx={{ padding: 2 }}>
+            <Box
+              sx={{
+                padding: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Paper sx={{width:"100%",display:"flex",justifyContent:"space-between",padding:2,backgroundColor:"#E8F5E9"}}>
+              <Typography sx={{ fontSize: "25px", fontWeight: 700 }}>
+                REASON
+              </Typography>
+              <CustomButton
+                buttonName="+ ADD REASON"
+                sx={{ backgroundColor: "#4EB24E" }}
+                onClick={() => {
+                  setEditData(null);
+                  setIsModalOpen(true);
+                }}
+              />
+               </Paper>
+            </Box>
+
+            <CustomTable
+              dataSource={fetchdata}
+              columns={reasonColumns}
+              currentPage={currentpage}
+              total={fetchdata.length}
+              onPageChange={(page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize);
+              }}
+            />
+          </Paper>
+
+          <ReasonFormModal
+            visible={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleFormSubmit}
+            isEdit={!!editData}
+            initialValues={
+              editData ?? {
+                name: "",
+                type: "",
+              }
+            }
           />
         </Box>
-
-        <CustomTable
-          dataSource={fetchdata}
-          columns={reasonColumns}
-          currentPage={currentpage}
-          total={fetchdata.length}
-          onPageChange={(page, pageSize) => {
-            setCurrentPage(page);
-            setPageSize(pageSize);
-          }}
-        />
-      </Paper>
-
-      <ReasonFormModal
-        visible={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleFormSubmit}
-        isEdit={!!editData}
-        initialValues={
-          editData ?? {
-            name: "",
-            type: "",
-          }
-        }
-      />
-    </Box>
+      )}
+    </>
   );
 }
 
