@@ -302,14 +302,25 @@ function UserMangement() {
             formik={formik}
           />
 
-          <div className="d-flex gap-2 my-2">
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              my: 2,
+            }}
+          >
             <CustomButton
               variant="outlined"
               buttonName="FILTER"
               type="submit"
-              sx={{ backgroundColor: "green", color: "white","&:hover": {
-                backgroundColor: "#006400",
-              }, }}
+              sx={{
+                backgroundColor: "green",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "#006400",
+                },
+              }}
             />
             <CustomButton
               variant="outlined"
@@ -322,13 +333,13 @@ function UserMangement() {
                 setCurrentPage(1);
               }}
             />
-          </div>
+          </Box>
         </form>
       </Paper>
 
-      <Paper sx={{ backgroundColor: "#E8F5E9" }}>
-        <Box style={{ padding: 20 }}>
-          <Typography sx={{ color: "black", fontSize: 20 }}>
+      <Paper sx={{ backgroundColor: "#E8F5E9", overflowX: "auto" }}>
+        <Box sx={{ padding: 2, minWidth: "100%" }}>
+          <Typography sx={{ color: "black", fontSize: 20, mb: 2 }}>
             User List
           </Typography>
           {loading ? (
@@ -344,6 +355,7 @@ function UserMangement() {
               onPageChange={handlePageChange}
               pageSize={pageSize}
               loading={loading}
+             
             />
           )}
         </Box>

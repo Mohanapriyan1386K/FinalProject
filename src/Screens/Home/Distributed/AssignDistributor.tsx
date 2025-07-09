@@ -8,7 +8,6 @@ import { useUserdata } from "../../../Hooks/UserHook";
 import CustomDropDown from "../../../Compontents/CustomDropDown";
 import CustomButton from "../../../Compontents/CoustomButton";
 import CustomDatePicker from "../../../Compontents/CustomDatePicker";
-import styles from "../../../Styles/Distributor.module.css";
 import { Select, Spin, Divider, Card, Row, Col } from "antd";
 
 type SlotFormValues = {

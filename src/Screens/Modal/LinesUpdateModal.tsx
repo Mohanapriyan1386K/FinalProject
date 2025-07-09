@@ -4,7 +4,7 @@ import GlobalModal from "../../Compontents/GlobalModal";
 import { useEffect, useRef } from "react";
 
 interface FormValues {
-  token: string;
+  token?: string;
   name: string;
   lines_id:string
   description: string;

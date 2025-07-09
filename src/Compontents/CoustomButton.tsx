@@ -9,7 +9,7 @@ interface CustomButtonProps {
   width?: string | number;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
-  sx?: SxProps<Theme>; // ✅ sx for extra styling
+  sx?: SxProps<Theme>; 
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
