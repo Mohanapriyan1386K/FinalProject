@@ -151,8 +151,8 @@ const Placeorder = () => {
     });
   };
 
-  const hasMorning = !!data?.today_slot_data.find((s) => s.slot_id === 1);
-  const hasEvening = !!data?.today_slot_data.find((s) => s.slot_id === 2);
+  const hasMorning = !!data?.today_slot_data.find((s) => s.slot_id == 1);
+  const hasEvening = !!data?.today_slot_data.find((s) => s.slot_id == 2);
 
   const validationSchema = Yup.object({
     morning_quantity: Yup.number().when([], {
@@ -258,6 +258,7 @@ const Placeorder = () => {
   // console.log("FOrmik error", formik.errors);
   // console.log("FOrmik touched", formik.touched);
   // console.log("FOrmik values", formik.values);
+  console.log(data)
   const totalQty =
     Number(formik.values.morning_quantity || 0) +
     Number(formik.values.evening_quantity || 0);
@@ -379,7 +380,7 @@ const Placeorder = () => {
               onSubmit={formik.handleSubmit}
               sx={{ maxWidth: 500, mx: "auto", p: 2 }}
             >
-              {hasMorning || activeslot.data.id == 1 && (
+              {hasMorning && activeslot.data.id == 1 && (
                 <CustomInputField
                   fullWidth
                   label="Morning Quantity"
@@ -398,7 +399,7 @@ const Placeorder = () => {
                 />
               )}
 
-              {hasEvening || activeslot.data.id == 2 && (
+              {hasEvening && activeslot.data.id == 2 && (
                 <CustomInputField
                   fullWidth
                   label="Evening Quantity"
