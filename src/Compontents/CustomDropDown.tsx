@@ -142,14 +142,15 @@ const CustomDropDown: React.FC<ReusableDropdownsProps> = ({
         message.error("Failed to fetch customers.");
       });
   };
-
   const renderSelect = (name: string, placeholder: string, options: any[]) => (
     <div className="col-md-4 mb-3" key={name}>
       <label>{placeholder}</label>
       <Select
-        style={{width:"500px"}}
+        style={{ width: "500px" }}
         mode={name === "customer_id" ? "multiple" : undefined}
         allowClear
+        showSearch
+        optionFilterProp="label"
         className={`w-100 ${errors[name] && touched[name] ? "is-invalid" : ""}`}
         value={values[name] ?? (name === "customer_id" ? [] : undefined)}
         placeholder={`Select ${placeholder.toLowerCase()}`}
@@ -159,7 +160,7 @@ const CustomDropDown: React.FC<ReusableDropdownsProps> = ({
         onBlur={() => handleBlur({ target: { name } })}
       >
         {options.map((opt) => (
-          <Option key={opt.value} value={opt.value}>
+          <Option key={opt.value} value={opt.value} label={opt.label}>
             {opt.label}
           </Option>
         ))}
@@ -197,7 +198,11 @@ const CustomDropDown: React.FC<ReusableDropdownsProps> = ({
       {dropdownKeys.includes("milk_give_type") &&
         renderSelect("milk_give_type", "Milk Give Type", MilkGiveType)}
       {dropdownKeys.includes("Coustomer_get_milktype") &&
-        renderSelect("Coustomer_get_milktype", "Customer Milk Type", Coustomergetmilktype)}
+        renderSelect(
+          "Coustomer_get_milktype",
+          "Customer Milk Type",
+          Coustomergetmilktype
+        )}
       {dropdownKeys.includes("slot_id") &&
         renderSelect("slot_id", "Slot", SlotId)}
       {dropdownKeys.includes("assign_type") &&
