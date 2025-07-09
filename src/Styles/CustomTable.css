@@ -4,3 +4,12 @@
   font-weight: bold;
   text-align: center;
 }
+.custom-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-table-header .ant-table {
+  min-width: 100%;
+}
+

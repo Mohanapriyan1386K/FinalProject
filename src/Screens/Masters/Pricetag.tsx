@@ -80,8 +80,13 @@ function Pricetag() {
         payload.append("status", newStatus.toString());
 
         masterpricetageActive(payload)
-          .then(() => {
-            toast.success("Status updated successfully");
+          .then((res) => {
+            if(res.data.status==0){
+              toast.error(res.data.msg)
+            }
+            else if(res.data.status==1){
+              toast.success("Status updated successfully");
+            }
             fetchdata(currentPage, pageSize);
           })
           .catch(() => {
@@ -105,8 +110,12 @@ function Pricetag() {
 
         masterpricetageDelete(payload)
           .then((res) => {
-            toast.success(res.data.msg);
-            fetchdata(currentPage, pageSize);
+            if(res.data.status==0){
+              toast.info(res.data.msg);
+              fetchdata(currentPage, pageSize);
+            }else if(res.data.status==1){
+               toast.success(res.data.msg)
+            }
           })
           .catch(() => {
             toast.error("Try again");

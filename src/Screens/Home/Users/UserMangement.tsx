@@ -167,32 +167,36 @@ function UserMangement() {
           {(currentPage - 1) * pageSize + index + 1}
         </span>
       ),
-      width: 70,
+      width: 60,
     },
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "User Type", dataIndex: "user_type", key: "user_type" },
+    { title: "Name", dataIndex: "name", key: "name", width: 100 },
+    { title: "User Type", dataIndex: "user_type", key: "user_type", width: 90 },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      width: 130,
       render: (email: string) => email?.trim() || "--",
     },
-    { title: "Phone", dataIndex: "phone", key: "phone" },
+    { title: "Phone", dataIndex: "phone", key: "phone", width: 110 },
     {
       title: "Customer Type",
       dataIndex: "customer_type",
       key: "customer_type",
+      width: 120,
     },
     {
       title: "Pay Type",
       dataIndex: "pay_type",
       key: "pay_type",
+      width: 90,
       render: (pay_type: number) => (pay_type === 1 ? "Daily" : "Monthly"),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 80,
       render: (status: number) =>
         status === 1 ? (
           <CheckCircleTwoTone twoToneColor="#52c41a" />
@@ -203,6 +207,7 @@ function UserMangement() {
     {
       title: "Actions",
       key: "actions",
+      width: 160,
       render: (_: any, record: User) => (
         <Box sx={{ display: "flex", gap: 1, justifyContent: "space-around" }}>
           <Tooltip title="Edit">
@@ -336,28 +341,28 @@ function UserMangement() {
           </Box>
         </form>
       </Paper>
-
-      <Paper sx={{ backgroundColor: "#E8F5E9", overflowX: "auto" }}>
-        <Box sx={{ padding: 2, minWidth: "100%" }}>
-          <Typography sx={{ color: "black", fontSize: 20, mb: 2 }}>
-            User List
-          </Typography>
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <Loader />
-            </div>
-          ) : (
-            <CustomTable
-              dataSource={users}
-              columns={columns}
-              currentPage={currentPage}
-              total={total}
-              onPageChange={handlePageChange}
-              pageSize={pageSize}
-              loading={loading}
-             
-            />
-          )}
+      <Paper sx={{ backgroundColor: "#E8F5E9", padding: 2 }}>
+        <Box sx={{ overflowX: "auto" }}>
+          <Box sx={{ minWidth: "900px" }}>
+            <Typography sx={{ color: "black", fontSize: 20, mb: 2 }}>
+              User List
+            </Typography>
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "40px 0" }}>
+                <Loader />
+              </div>
+            ) : (
+              <CustomTable
+                dataSource={users}
+                columns={columns}
+                currentPage={currentPage}
+                total={total}
+                onPageChange={handlePageChange}
+                pageSize={pageSize}
+                loading={loading}
+              />
+            )}
+          </Box>
         </Box>
       </Paper>
 

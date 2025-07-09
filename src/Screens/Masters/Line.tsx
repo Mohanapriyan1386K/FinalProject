@@ -167,8 +167,13 @@ function Line() {
     payload.append("status", Status.toString());
 
     masterLineStautus(payload)
-      .then(() => {
-        toast.success("Status updated successfully");
+      .then((res) => {
+          if(res.data.status==1){
+            toast.success(res.data.msg)
+          }
+          else if(res.data.status==0){
+            toast.info(res.data.msg)
+          }
         fetchLineList();
       })
       .catch(() => {

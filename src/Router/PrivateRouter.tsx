@@ -21,7 +21,7 @@ export const AuthPrivate = () => {
 export const AdminPrivate = () => {
   const token = useUserdata();
   const type = useUsertype();
-  return token && type === 1 ? <Outlet /> : <Navigate to="/" replace />;
+  return token && type === 1? <Outlet /> : <Navigate to="/" replace />;
 };
 
 // Vendor route guard

@@ -44,9 +44,7 @@ export const Distributor: RouteObject[] = [
   {
     element: <MainLayout />,
     children: [
-      {
-        path: "",element: <Distributordasboard />,
-      },
+      {path: "",element: <Distributordasboard />},
     ],
   },
 ];

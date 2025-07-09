@@ -85,8 +85,13 @@ function Reason() {
 
         masterReasonDelete(payload)
           .then((res) => {
-            toast.success(res.data.msg);
-            ReasonFetch();
+            if(res.data.status==0){
+              toast.info(res.data.msg);
+              ReasonFetch();
+            }else if (res.data.status==1){
+              toast.success(res.data.msg)
+              ReasonFetch()
+            }
           })
           .catch(() => {
             toast.error("Try again");
@@ -111,9 +116,13 @@ function Reason() {
         payload.append("status", newStatus.toString());
 
         masterReasonStatus(payload)
-          .then(() => {
-            toast.success("Status updated successfully");
-            ReasonFetch();
+          .then((res) => {
+            if(res.data.msg==0){
+              toast.info(res.data.msg);
+            }else if(res.data.status==1){
+               toast.success(res.data.msg)
+               ReasonFetch();
+            }
           })
           .catch(() => {
             toast.error("Try again");
