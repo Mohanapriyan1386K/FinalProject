@@ -27,13 +27,13 @@ function Resetpassword() {
     formdatas.append("reset_key", reset_key);
 
     resetpassword(formdatas)
-      .then((res) => {
+      .then(() => {
         toast.success("Successfully reset password");
         Cookie.remove("reset_key");
         Cookie.remove("otp_verify");
         navigate("/");
       })
-      .catch((error) => {
+      .catch(() => {
         toast.error("Failed to reset password");
       });
   };
