@@ -28,8 +28,8 @@ function ForgetPassword() {
         } else if (response.data.status === 1) {
           toast.success("OTP successfully sent", {
             autoClose: 1000,
-            onClose: () => navigate("/verify-otp"),
           });
+          navigate("/verify-otp")
           setEncryptedCookie("reset_key", response.data.reset_key);
           setEncryptedCookie("otp_verify", response.data.reset_key);
         }

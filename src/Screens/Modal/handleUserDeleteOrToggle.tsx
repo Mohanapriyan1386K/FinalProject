@@ -30,7 +30,7 @@ export const handleUserDeleteOrToggle = async (
       deleteuser(formData)
         .then((response) => {
           toast.success(response.data.msg || `User ${action}d successfully`);
-          callback(); // refetch data
+          callback();
         })
         .catch((error) => {
           console.error(`Error during ${action}:`, error);

@@ -8,6 +8,7 @@ import { useFormik } from "formik";
 import { resetpassword } from "../../Services/ApiService";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import  Cookie  from "js-cookie";
 
 function Resetpassword() {
   const naviagte=useNavigate()
@@ -27,6 +28,8 @@ function Resetpassword() {
 
     resetpassword(formdatas).then((res) => {
         toast.success("Successfully reset password",res);
+        Cookie.remove("reset_key")
+        Cookie.remove("otp_verify")
         naviagte("/")
     }).catch((error)=>{
       toast.error("error",error)
@@ -37,6 +40,7 @@ function Resetpassword() {
     initialValues: { new_password: "", confirm_password: "" },
     validationSchema,
     onSubmit: handlesumbitnewpassword,
+    
   });
 
   const {
