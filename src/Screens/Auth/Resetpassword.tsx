@@ -8,10 +8,10 @@ import { useFormik } from "formik";
 import { resetpassword } from "../../Services/ApiService";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import  Cookie  from "js-cookie";
+import Cookie from "js-cookie";
 
 function Resetpassword() {
-  const naviagte=useNavigate()
+  const navigate = useNavigate();
   const reset_key = getDecryptedCookie("reset_key");
 
   const validationSchema = Yup.object({
@@ -26,21 +26,22 @@ function Resetpassword() {
     formdatas.append("new_password", values.new_password);
     formdatas.append("reset_key", reset_key);
 
-    resetpassword(formdatas).then((res) => {
-        toast.success("Successfully reset password",res);
-        Cookie.remove("reset_key")
-        Cookie.remove("otp_verify")
-        naviagte("/")
-    }).catch((error)=>{
-      toast.error("error",error)
-    });
+    resetpassword(formdatas)
+      .then((res) => {
+        toast.success("Successfully reset password");
+        Cookie.remove("reset_key");
+        Cookie.remove("otp_verify");
+        navigate("/");
+      })
+      .catch((error) => {
+        toast.error("Failed to reset password");
+      });
   };
 
   const formik = useFormik({
     initialValues: { new_password: "", confirm_password: "" },
     validationSchema,
     onSubmit: handlesumbitnewpassword,
-    
   });
 
   const {
@@ -93,11 +94,7 @@ function Resetpassword() {
           Reset Your Password
         </Typography>
 
-        <Typography
-          fontSize={16}
-          color="gray"
-          textAlign="center"
-        >
+        <Typography fontSize={16} color="gray" textAlign="center">
           Create a new password for your account
         </Typography>
 
@@ -124,12 +121,12 @@ function Resetpassword() {
           />
 
           <CustomInputField
-            value={values.confirm_password}
-            name="confirm_password"
             type="password"
+            name="confirm_password"
             label="Confirm Password"
             variant="outlined"
             onChange={handleChange}
+            value={values.confirm_password}
             onBlur={handleBlur}
             error={touched.confirm_password && Boolean(errors.confirm_password)}
             helperText={touched.confirm_password ? errors.confirm_password : ""}

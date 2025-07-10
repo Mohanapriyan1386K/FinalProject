@@ -303,7 +303,6 @@ const CreateUser = () => {
             onChange={handleChange}
             onBlur={handleBlur}
             error={(errors.slot_data?.[index] as any)?.quantity}
-            touched={(touched.slot_data?.[index] as any)?.quantity}
           />
         </div>
         <div className="col-md-4 mb-3">
@@ -342,7 +341,6 @@ const CreateUser = () => {
               }}
               onBlur={handleBlur}
               error={(errors.slot_data?.[index] as any)?.start_date}
-              touched={(touched.slot_data?.[index] as any)?.start_date}
             />
           </div>
         )}
@@ -384,8 +382,8 @@ const CreateUser = () => {
                 value={values.name}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.name}
-                touched={touched.name}
+                error={Boolean(touched.name && errors.name)}
+                helperText={touched.name ? errors.name : ""}
               />
             </div>
             <div className="col-md-6 mb-3">
@@ -396,8 +394,8 @@ const CreateUser = () => {
                 value={values.user_name}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.user_name}
-                touched={touched.user_name}
+                error={Boolean(touched.name && errors.user_name)}
+                helperText={touched.name ? errors.user_name : ""}
               />
             </div>
           </div>
@@ -411,8 +409,8 @@ const CreateUser = () => {
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.email}
-                touched={touched.email}
+                error={Boolean(touched.name && errors.email)}
+                helperText={touched.name ? errors.email : ""}
               />
             </div>
             <div className="col-md-6 mb-3">
@@ -423,8 +421,8 @@ const CreateUser = () => {
                 value={values.phone}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.phone}
-                touched={touched.phone}
+                error={Boolean(touched.phone && errors.phone)}
+                helperText={touched.phone ? errors.phone : ""}
               />
             </div>
           </div>
@@ -438,8 +436,8 @@ const CreateUser = () => {
                 value={values.alternative_number}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.alternative_number}
-                touched={touched.alternative_number}
+                error={Boolean(touched.phone && errors.alternative_number)}
+                helperText={touched.phone ? errors.alternative_number : ""}
               />
             </div>
             {!isEdit && (
@@ -452,8 +450,8 @@ const CreateUser = () => {
                   value={values.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={errors.password}
-                  touched={touched.password}
+                  error={Boolean(touched.phone && errors.password)}
+                  helperText={touched.phone ? errors.password : ""}
                 />
               </div>
             )}

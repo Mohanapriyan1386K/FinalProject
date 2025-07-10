@@ -1,4 +1,3 @@
-// CustomInputField.tsx
 import { TextField, type SxProps, type Theme } from "@mui/material";
 import React from "react";
 
@@ -10,15 +9,14 @@ interface CustomInputProps {
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   type?: string;
   placeholder?: string;
-  error?: any;
-  touched?: any;
+  error?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
   required?: boolean;
   autoFocus?: boolean;
   variant?: "standard" | "outlined" | "filled";
   sx?: SxProps<Theme>;
-  helperText?: any;
+  helperText?: React.ReactNode;
 }
 
 const CustomInputField: React.FC<CustomInputProps> = ({
@@ -29,14 +27,14 @@ const CustomInputField: React.FC<CustomInputProps> = ({
   onBlur,
   type = "text",
   placeholder,
-  error = "",
-  touched = false,
+  error = false,
   disabled = false,
   fullWidth = true,
   required = false,
   autoFocus = false,
   variant = "outlined",
   sx,
+  helperText,
 }) => {
   return (
     <TextField
@@ -47,8 +45,8 @@ const CustomInputField: React.FC<CustomInputProps> = ({
       onBlur={onBlur}
       type={type}
       placeholder={placeholder}
-      error={touched && Boolean(error)}
-      helperText={touched && error ? error : ""}
+      error={error}
+      helperText={helperText}
       disabled={disabled}
       fullWidth={fullWidth}
       required={required}
@@ -56,15 +54,15 @@ const CustomInputField: React.FC<CustomInputProps> = ({
       variant={variant}
       margin="normal"
       sx={{
-        height:1, // Adjust overall field height
+        height: 1,
         "& .MuiInputBase-root": {
-          height: 50, // Controls the outer input box height
+          height: 50,
           fontSize: "14px",
         },
         "& input": {
-          padding: "10px 10px", // Controls the input text height
+          padding: "10px 10px",
         },
-        ...sx, // Allow override from props
+        ...sx,
       }}
     />
   );
